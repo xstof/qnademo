@@ -1,0 +1,30 @@
+{
+  "type": "Session",
+  "id": "testid",
+  "partitionId": "session-testid",
+  "lastReleasedQuestionId": "1",
+  "sessionId": "testid",
+  "sessionName": "name of the session",
+  "questions": [
+    {
+      "title": "This is the first question",
+      "id": "1",
+      "isReleased": true,
+      "answerOptions": [
+        {
+          "id": "1",
+          "title": "answer option 1 - from third question"
+        },
+        {
+          "id": "2",
+          "title": "answer option 2 - from third question"
+        }
+      ]
+    }
+  ],
+  "_rid": "K9RPAJhcMaGBhB4AAAAAAA==",
+  "_self": "dbs/K9RPAA==/colls/K9RPAJhcMaE=/docs/K9RPAJhcMaGBhB4AAAAAAA==/",
+  "_etag": "\"2e005074-0000-0d00-0000-5db2a7060000\"",
+  "_attachments": "attachments/",
+  "_ts": 1571989254
+}

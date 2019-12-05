@@ -1,0 +1,100 @@
+@sessionid = testid2
+@questionid = 1
+@userid = myuserid
+@proto = https
+@host = qna-frontdoor.azurefd.net
+@port = 443
+
+@token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ilg1ZVhrNHh5b2pORnVtMWtsMll0djhkbE5QNC1jNTdkTzZRR1RWQndhTmsifQ.eyJpc3MiOiJodHRwczovL3hzdG9mYjJjLmIyY2xvZ2luLmNvbS9lZjJiYmM4NC1kOGE3LTRhMTEtOGQ2Ny0yMTIzYmRhOGRhOTgvdjIuMC8iLCJleHAiOjE1NzIyODIxNjYsIm5iZiI6MTU3MjI3ODU2NiwiYXVkIjoiZDAzZmM5N2UtY2M0ZS00NzU4LTk0NGEtNDNmZTRjZjNlZWNjIiwiaWRwIjoiaHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tLzcyZjk4OGJmLTg2ZjEtNDFhZi05MWFiLTJkN2NkMDExZGI0Ny92Mi4wIiwibmFtZSI6IkNocmlzdG9mIENsYWVzc2VucyIsInN1YiI6IjY3MGI4NDFmLTAyYjAtNGI4MS1hYWY1LTM2NjYwOTAyNWNmNiIsImNvdW50cnkiOiJCZWxnaXVtIiwiZ2l2ZW5fbmFtZSI6IkNocmlzdG9mIiwiZmFtaWx5X25hbWUiOiJDbGFlc3NlbnMiLCJlbWFpbHMiOlsiY2hyaXN0b2ZjbGFlc3NlbnNAaG90bWFpbC5jb20iXSwidGZwIjoiQjJDXzFfc3VzaSIsIm5vbmNlIjoiM2RlMDQ2MzYtYTNjMy00ZWE0LTk4YjUtNmJkOTA5Nzc0ZGVjIiwic2NwIjoicW5hX2F1dGhvciIsImF6cCI6ImQwM2ZjOTdlLWNjNGUtNDc1OC05NDRhLTQzZmU0Y2YzZWVjYyIsInZlciI6IjEuMCIsImlhdCI6MTU3MjI3ODU2Nn0.gUae72A_fdsOhJ4rM-nhceCiSXncQ-i1bYMdROiv4WtG97c23chh5GJ5QpfayhReMPoglp7w3yZUArwt3f1oZmdCVNqoKmHkwHIGWXvjc4Yo3mi1qvsWW9vW8H2uIWj2Z9Rmyg2suvDYGfLpq9WL76mDRWO2i1gbMnoljQVNX-QDXy1A34TUvAGSI2l40ZorNoaWyIKWYRuFIgFvajFghS1OOBCxyJaJM7urwE94diG55ryjQvr6r6fz9zVlnhlBB779ryxNxEWPb5e1KHWsC3FDiOwouQ7-10dYIkFIz4Yp10t87ENlulVOoitc4ykyBGhGY-xh3lhHT45NNfYZFA'
+
+@baseurl = {{proto}}://{{host}}:{{port}}/api
+
+# AddQuestion:       [POST] http://localhost:7071/api/sessions/{sessionId}/questions
+# CreateSession:     [POST] http://localhost:7071/api/CreateSession
+# GetConfiguration:  [GET] http://localhost:7071/api/configuration
+# GetSession:        [GET] http://localhost:7071/api/sessions/{sessionId}
+# GetSessionSummary: [GET] http://localhost:7071/api/sessions/{sessionId}/summary
+# negotiate:         [POST] http://localhost:7071/api/sessions/{sessionId}/signalr/{userId}/negotiate
+# ReleaseQuestion:   [POST] http://localhost:7071/api/sessions/{sessionId}/questions/{questionid}/release
+# SubmitAnswer:      [POST] http://localhost:7071/api/sessions/{sessionId}/questions/{questionid}/answers/{userId}
+# Subscribe:         [POST] http://localhost:7071/api/sessions/{sessionId}/signalr/{userId}/subscribe
+
+# Please install the Visual Studio Code "Rest Client" plugin for using the below interactively
+
+# get regional configuration from the api":
+GET {{baseurl}}/configuration HTTP/1.1
+
+###
+
+# creates a new session with given id and name:
+POST {{baseurl}}/CreateSession HTTP/1.1
+content-type: application/json
+Authorization: Bearer @token
+
+{
+	"id": "{{sessionid}}",
+	"name": "name of the session"
+}
+
+###
+
+# get empty session back with given id:
+GET {{baseurl}}/sessions/{{sessionid}} HTTP/1.1
+
+###
+
+# add another question to the session:
+POST {{baseurl}}/sessions/{{sessionid}}d/questions HTTP/1.1
+
+{
+	"title": "This is the first question",
+	"id": "{{questionid}}",
+	"answerOptions": [{
+			"id": "1",
+			"title": "answer option 1 - from third question"
+		},
+		{
+			"id": "2",
+			"title": "answer option 2 - from third question"
+		}
+	]
+}
+
+###
+
+# get session back with added question:
+GET {{baseurl}}/sessions/{{sessionid}} HTTP/1.1
+
+###
+
+# release question to participants:
+POST {{baseurl}}/sessions/{{sessionid}}/questions/{{questionid}}/release HTTP/1.1
+
+###
+
+# get session summary back with last released question:
+GET {{baseurl}}/sessions/{{sessionid}}/summary HTTP/1.1
+
+###
+
+# to negotiate signalr connection, participant will first call
+# into subscribe method:
+
+POST {{baseurl}}/sessions/{{sessionid}}/signalr/{{userid}}/subscribe
+
+# this gives back the url to negotiate the regional signalr connection on
+
+###
+
+# submit answer to a question:
+POST {{baseurl}}/sessions/{{sessionid}}/questions/{{questionid}}/answers/{{userid}}
+
+{
+	"answerid": "1"
+}
+
+###
+
+# retrieve results for a session:
+GET {{baseurl}}/sessions/{{sessionid}}/results
+

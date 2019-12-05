@@ -1,0 +1,186 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "frontDoorName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the frontdoor resource."
+            }
+        },
+        "staticAssetsBackendAddresses": {
+            "type": "array",
+            "metadata": {
+                "description": "Array of FQDN of backend addresses for static assets to put in the pool."
+            }
+        },
+        "functionAppBackendAddresses": {
+            "type": "array",
+            "metadata": {
+                "description": "Array of FQDN of backend addresses for function apps to put in the pool."
+            }
+        }
+    },
+    "variables": {
+        "frontdoorLocation": "global"
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-04-01",
+            "type": "Microsoft.Network/frontDoors",
+            "name": "[parameters('frontDoorName')]",
+            "location": "[variables('frontdoorLocation')]",
+            "tags": {},
+            "properties": {
+                "routingRules": [
+                    {
+                        "name": "static-assets-routing-rule",
+                        "properties": {
+                            "frontendEndpoints": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', parameters('frontDoorName'), 'frontendEndpoint1')]"
+                                }
+                            ],
+                            "acceptedProtocols": [
+                                "Http",
+                                "Https"
+                            ],
+                            "patternsToMatch": [
+                                "/*"
+                            ],
+                            "routeConfiguration": {
+                                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",                                
+                                "forwardingProtocol": "MatchRequest",
+                                "backendPool": {
+                                    "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', parameters('frontDoorName'), 'static-assets-bepool')]"
+                                }                                
+                            },
+                            "enabledState": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "functions-routing-rule",
+                        "properties": {
+                            "frontendEndpoints": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', parameters('frontDoorName'), 'frontendEndpoint1')]"
+                                }
+                            ],
+                            "acceptedProtocols": [
+                                "Https"
+                            ],
+                            "patternsToMatch": [
+                                "/api/*"
+                            ],
+                            "routeConfiguration": {
+                                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",                                
+                                "forwardingProtocol": "MatchRequest",
+                                "backendPool": {
+                                    "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', parameters('frontDoorName'), 'functions-bepool')]"
+                                }                                
+                            },
+                            "enabledState": "Enabled"
+                        }
+                    }
+                ],
+                "healthProbeSettings": [
+                    {
+                        "name": "healthProbeStaticAssets",
+                        "properties": {
+                            "path": "/",
+                            "protocol": "Http",
+                            "intervalInSeconds": 120
+                        }
+                    },
+                     {
+                        "name": "healthProbeFunctions",
+                        "properties": {
+                            "path": "/api/configuration",
+                            "protocol": "Https",
+                            "intervalInSeconds": 120
+                        }
+                    }
+                ],
+                "loadBalancingSettings": [
+                    {
+                        "name": "loadBalancingSettingsStaticAssets",
+                        "properties": {
+                            "sampleSize": 4,
+                            "successfulSamplesRequired": 2
+                        }
+                    },
+                    {
+                        "name": "loadBalancingSettingsFunctions",
+                        "properties": {
+                            "sampleSize": 4,
+                            "successfulSamplesRequired": 2
+                        }
+                    }
+                ],               
+                "backendPools": [
+                    {
+                        "name": "static-assets-bepool",
+                        "properties": {
+                            "copy": [
+                                {
+                                    "name": "backends",
+                                    "count": "[length(parameters('staticAssetsBackendAddresses'))]",
+                                    "input": {
+                                        "address": "[parameters('staticAssetsBackendAddresses')[copyIndex('backends')]]",
+                                        "backendHostHeader": "[parameters('staticAssetsBackendAddresses')[copyIndex('backends')]]",
+                                        "httpPort": 80,
+                                        "httpsPort": 443,
+                                        "weight": 50,
+                                        "priority": 1,
+                                        "enabledState": "Enabled"
+                                    }
+                                }],                    
+                            "loadBalancingSettings": {
+                                "id": "[resourceId('Microsoft.Network/frontDoors/loadBalancingSettings', parameters('frontDoorName'), 'loadBalancingSettingsStaticAssets')]"
+                            },
+                            "healthProbeSettings": {
+                                "id": "[resourceId('Microsoft.Network/frontDoors/healthProbeSettings', parameters('frontDoorName'), 'healthProbeStaticAssets')]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "functions-bepool",
+                        "properties": {
+                            "copy": [
+                                {
+                                    "name": "backends",
+                                    "count": "[length(parameters('functionAppBackendAddresses'))]",
+                                    "input": {
+                                        "address": "[parameters('functionAppBackendAddresses')[copyIndex('backends')]]",
+                                        "backendHostHeader": "[parameters('functionAppBackendAddresses')[copyIndex('backends')]]",
+                                        "httpPort": 80,
+                                        "httpsPort": 443,
+                                        "weight": 50,
+                                        "priority": 1,
+                                        "enabledState": "Enabled"
+                                    }
+                                }],                    
+                            "loadBalancingSettings": {
+                                "id": "[resourceId('Microsoft.Network/frontDoors/loadBalancingSettings', parameters('frontDoorName'), 'loadBalancingSettingsFunctions')]"
+                            },
+                            "healthProbeSettings": {
+                                "id": "[resourceId('Microsoft.Network/frontDoors/healthProbeSettings', parameters('frontDoorName'), 'healthProbeFunctions')]"
+                            }
+                        }
+                    }
+                ],
+                "frontendEndpoints": [
+                    {
+                        "name": "frontendEndpoint1",
+                        "properties": {
+                            "hostName": "[concat(parameters('frontDoorName'), '.azurefd.net')]",
+                            "sessionAffinityEnabledState": "Disabled"
+                        }
+                    }
+                ],
+                "enabledState": "Enabled"
+            }
+        }
+    ],
+    "outputs": {}
+}

@@ -1,0 +1,193 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "Location of nested templates"
+            }
+        },
+        "artifactsLocationSasToken": {
+            "type": "string",
+            "metadata": {
+                "description": "Sas token with which to access nested templates"
+            }
+        },
+        "artifactPrefix": {
+            "type": "string",
+            "defaultValue": "qna",
+            "metadata": {
+                "description": "Prefix for generated artifacts"
+            }
+        },
+        "resourceGroupPrefix": {
+            "type": "string",
+            "defaultValue": "qna",
+            "metadata": {
+                "description": "Prefix for generated resource groups"
+            }
+        },
+        "aadClientId": {
+            "type": "string",
+            "metadata": {
+            "description": "Client ID of the AAD B2C Application linked to the API Auth"
+            }
+        },            
+        "aadB2cIssuer": {
+            "type": "string",
+            "metadata": {
+                "description": "Link to the well known Open ID Configuration for the sign in policy."
+            }
+        },
+        "deploymentConfig": {
+            "type": "object",
+            "metadata": {
+                "description": "Configuration for the deployment as json formatted object"
+            }
+        }
+    },
+    "variables": {
+        "regions": "[parameters('deploymentConfig').regions]",
+        "resourceGroupPrefix": "[parameters('resourceGroupPrefix')]",
+        "artifactPrefix": "[parameters('artifactPrefix')]",
+        "emptyArray": [
+        ]
+    },
+    "resources": [
+        {
+            "copy": {
+                "name": "copy-rgs",
+                "count": "[length(parameters('deploymentConfig').regions)]"
+            },
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2018-05-01",
+            "location": "[variables('regions')[copyIndex('copy-rgs')].region]",
+            "name": "[concat(variables('resourceGroupPrefix'), '-', variables('regions')[copyIndex('copy-rgs')].regionCode)]",
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2019-08-01",
+            "location": "West Europe",
+            "name": "[concat(variables('resourceGroupPrefix'), '-infra')]",
+            "properties": {}
+        },
+        {
+            "name": "deploy-laworkspace",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "resourceGroup": "[concat(variables('resourceGroupPrefix'), '-infra')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('artifactsLocation'), '/nestedtemplates/loganalytics-template.json', parameters('artifactsLocationSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "laWorkspaceName": {
+                        "value": "[concat(variables('artifactPrefix'), '-la')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('resourceGroupPrefix'), '-infra')]"
+            ]
+        },
+        {
+            "name": "deploy-cosmosdb",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "resourceGroup": "[concat(variables('resourceGroupPrefix'), '-infra')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('artifactsLocation'), '/nestedtemplates/cosmosdb-template.json', parameters('artifactsLocationSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "accountName": {
+                        "value": "[concat(parameters('artifactPrefix'), '-cosmosdbacct')]"
+                    },
+                    "regions": {
+                        "value": "[variables('regions')]"
+                    },
+                    "databaseName": {
+                        "value": "[concat(parameters('artifactPrefix'), '-cosmosdatabase')]"
+                    },
+                    "containerName": {
+                        "value": "[concat(parameters('artifactPrefix'), '-container')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('resourceGroupPrefix'), '-infra')]"
+            ]
+        },
+        {
+            "copy": {
+                "name": "copy-geos",
+                "count": "[length(parameters('deploymentConfig').regions)]",
+                "mode": "Serial"
+            },
+            "name": "[concat('deploy-region-', variables('regions')[copyIndex('copy-geos')].region)]",
+            "resourceGroup": "[concat(variables('resourceGroupPrefix'), '-', variables('regions')[copyIndex('copy-geos')].regionCode)]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('artifactsLocation'), '/nestedtemplates/azuredeploy-singlegeo.json', parameters('artifactsLocationSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "artifactsLocation": {
+                        "value": "[parameters('artifactsLocation')]"
+                    },
+                    "artifactsLocationSasToken": {
+                        "value": "[parameters('artifactsLocationSasToken')]"
+                    },
+                    "region": {
+                        "value": "[variables('regions')[copyIndex('copy-geos')].region]"
+                    },
+                    "regionCode": {
+                        "value": "[variables('regions')[copyIndex('copy-geos')].regionCode]"
+                    },
+                    "artifactPrefix": {
+                        "value": "[variables('artifactPrefix')]"
+                    },
+                    "frontDoorName": {
+                        "value": "[concat(variables('artifactPrefix'), '-frontdoor')]"
+                    },
+                    "cosmosdbname": {
+                        "value": "[concat(parameters('artifactPrefix'), '-cosmosdatabase')]"
+                    },
+                    "cosmoscollectionname": {
+                        "value": "[concat(parameters('artifactPrefix'), '-container')]"
+                    },
+                    "cosmosconnectionstring": {
+                        "value": "[reference('deploy-cosmosdb').outputs.connectionString.value]"
+                    },
+                    "state": {
+                        "value": "[if(equals(copyIndex('copy-geos'), 0), variables('emptyArray'), reference(concat('deploy-region-', variables('regions')[sub(copyIndex('copy-geos'), 1)].region)).outputs.state.value)]"
+                    },
+                    "aadClientId": {
+                        "value": "[parameters('aadClientId')]"
+                    },
+                    "aadB2cIssuer" : {
+                        "value": "[parameters('aadB2cIssuer')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "deploy-cosmosdb"
+            ]
+        }
+    ],
+    "outputs": {
+        "regionDeployments": {
+            "type": "string",
+            "value": "[string(reference(concat('deploy-region-', variables('regions')[sub(length(parameters('deploymentConfig').regions), 1)].region)).outputs.state.value)]"
+        }
+    }
+}

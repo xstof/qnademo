@@ -1,0 +1,678 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "ApimServiceName": {
+      "type": "string"
+    },
+    "FunctionAppName": {
+      "type": "string"
+    },
+    "CorsUrl": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "pathOnWhichToExposeApi": "api"
+  },
+  "resources": [
+    {
+      "properties": {
+        "description": "[concat('Import from \"', parameters('FunctionAppName'), '\" Function App')]",
+        "authenticationSettings": {
+          "subscriptionKeyRequired": false
+        },
+        "subscriptionKeyParameterNames": {
+          "header": "Ocp-Apim-Subscription-Key",
+          "query": "subscription-key"
+        },
+        "apiRevision": "1",
+        "isCurrent": true,
+        "subscriptionRequired": false,
+        "displayName": "[parameters('FunctionAppName')]",
+        "path": "[variables('pathOnWhichToExposeApi')]",
+        "protocols": [
+          "https"
+        ]
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'))]",
+      "type": "Microsoft.ApiManagement/service/apis",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+      ]
+    },
+    {
+      "properties": {
+        "contentType": "application/vnd.oai.openapi.components+json",
+        "document": {
+          "value": "{\"value\":\"{\\\"components\\\":{\\\"schemas\\\":{\\\"SessionCreationDetails\\\":{\\\"type\\\":\\\"object\\\",\\\"properties\\\":{\\\"id\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"}}},\\\"ConfigurationResponse\\\":{\\\"type\\\":\\\"object\\\",\\\"properties\\\":{\\\"region\\\":{\\\"type\\\":\\\"string\\\"},\\\"userName\\\":{\\\"type\\\":\\\"string\\\"}}},\\\"QuestionDetails\\\":{\\\"type\\\":\\\"object\\\",\\\"properties\\\":{\\\"title\\\":{\\\"type\\\":\\\"string\\\"},\\\"id\\\":{\\\"type\\\":\\\"string\\\"},\\\"answerOptions\\\":{\\\"type\\\":\\\"array\\\",\\\"items\\\":{\\\"type\\\":\\\"object\\\",\\\"properties\\\":{\\\"id\\\":{\\\"type\\\":\\\"string\\\"},\\\"title\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"id\\\",\\\"title\\\"]}}}}}}}\"}"
+        }
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/1571241908216')]",
+      "type": "Microsoft.ApiManagement/service/apis/schemas",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), parameters('FunctionAppName'))]"
+      ]
+    },
+    {
+      "properties": {
+        "contentType": "application/vnd.oai.openapi.components+json",
+        "document": {
+          "value": "{\"components\":{\"schemas\":{\"SessionCreationDetails\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"}}},\"ConfigurationDetails\":{\"type\":\"object\",\"properties\":{\"region\":{\"type\":\"string\"},\"userName\":{},\"signalRNegotiateUrl\":{\"type\":\"string\"},\"browserSessionId\":{\"type\":\"string\"},\"auth\":{}}},\"SessionDetails\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"sessionId\":{\"type\":\"string\"},\"sessionName\":{\"type\":\"string\"},\"lastReleasedQuestionId\":{\"type\":\"string\"},\"questions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"title\":{\"type\":\"string\"},\"id\":{\"type\":\"string\"},\"isReleased\":{\"type\":\"boolean\"},\"answerOptions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"title\":{\"type\":\"string\"}},\"required\":[\"id\",\"title\"]}}},\"required\":[\"title\",\"id\",\"isReleased\",\"answerOptions\"]}}}},\"SessionResults\":{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\"},\"id\":{\"type\":\"string\"},\"partitionId\":{},\"sessionId\":{\"type\":\"string\"},\"sessionName\":{\"type\":\"string\"},\"questions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"title\":{\"type\":\"string\"},\"questionId\":{\"type\":\"string\"},\"answerOptions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"title\":{},\"voteCount\":{\"type\":\"integer\"}},\"required\":[\"id\",\"title\",\"voteCount\"]}}},\"required\":[\"title\",\"questionId\",\"answerOptions\"]}}}},\"SessionSummary\":{\"type\":\"object\",\"properties\":{\"sessionId\":{\"type\":\"string\"},\"sessionName\":{\"type\":\"string\"},\"lastReleasedQuestion\":{\"type\":\"string\"}}},\"AnswerSubmission\":{\"type\":\"object\",\"properties\":{\"answerid\":{\"type\":\"string\"}}},\"SubscriptionnResponse\":{\"type\":\"object\",\"properties\":{\"signalRNegotiateBaseUrl\":{\"type\":\"string\"}}}}}}"
+        }
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/1572599479291')]",
+      "type": "Microsoft.ApiManagement/service/apis/schemas",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), parameters('FunctionAppName'))]"
+      ]
+    },
+    {
+      "properties": {
+        "templateParameters": [
+          {
+            "name": "sessionId",
+            "description": "Identifier for the session to which to add a question",
+            "type": "string",
+            "required": true,
+            "values": [
+            ]
+          }
+        ],
+        "description": "Adds question to an existing session",
+          "request": {
+          "queryParameters": [],
+          "headers": [],
+          "representations": []
+        },
+        "responses": [
+          {
+            "statusCode": 200,
+            "description": "Question added",
+            "headers": [],
+            "representations": []
+          },
+          {
+            "statusCode": 400,
+            "description": "Session does not exist",
+            "headers": [],
+            "representations": []
+          }
+        ],
+        "displayName": "AddQuestion",
+        "method": "POST",
+        "urlTemplate": "/sessions/{sessionId}/questions"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/post-addquestion')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), parameters('FunctionAppName'))]"
+      ]
+    },
+    {
+      "properties": {
+        "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('FunctionAppName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "rawxml"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/post-addquestion/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('ApimServiceName'), parameters('FunctionAppName'), 'post-addquestion')]"
+      ]
+    },
+    {
+      "properties": {
+        "templateParameters": [],
+        "description": "Creates new session",
+        "request": {
+          "description": "Session creation details",
+          "queryParameters": [],
+          "headers": [],
+          "representations": [
+            {
+              "contentType": "application/json",
+              "sample": "{\r\n\t\"id\": \"{{sessionid}}\",\r\n\t\"name\": \"name of the session\"\r\n}",
+              "schemaId": "1572599479291",
+              "typeName": "SessionCreationDetails"
+            }
+          ]
+        },
+        "responses": [
+          {
+            "statusCode": 200,
+            "description": "Session created",
+            "headers": [],
+            "representations": []
+          },
+          {
+            "statusCode": 400,
+            "description": "Session exists already",
+            "headers": [],
+            "representations": []
+          }
+        ],
+        "displayName": "CreateSession",
+        "method": "POST",
+        "urlTemplate": "/CreateSession"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/post-createsession')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), parameters('FunctionAppName'))]",
+        "[resourceId('Microsoft.ApiManagement/service/apis/schemas', parameters('ApimServiceName'), parameters('FunctionAppName'), '1572599479291')]"
+      ]
+    },
+    {
+      "properties": {
+        "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('FunctionAppName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "rawxml"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/post-createsession/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('ApimServiceName'), parameters('FunctionAppName'), 'post-createsession')]"
+      ]
+    },
+    {
+      "properties": {
+        "templateParameters": [],
+        "description": "Gets (regional) configuration.  Can be used to determine which regional backend function was answering the request.",
+        "request": {
+          "queryParameters": [],
+          "headers": [],
+          "representations": []
+        },
+        "responses": [
+          {
+            "statusCode": 200,
+            "description": "Configuration details",
+            "headers": [],
+            "representations": [
+              {
+                "contentType": "application/json",                
+                "sample": "[concat('{\r\n  \"region\": \"northeurope\",\r\n  \"userName\": null,\r\n  \"signalRNegotiateUrl\": \"https://', parameters('FunctionAppName'), '.azurewebsites.net/api/sessions/{sessionId}/signalr/{userId}\",\r\n  \"browserSessionId\": \"e7f05f0f-50e0-42a8-95ca-a46a1f4b841a\",\r\n  \"auth\": null\r\n}')]",
+                "schemaId": "1572599479291",
+                "typeName": "ConfigurationDetails"
+              }
+            ]
+          }
+        ],
+        "displayName": "GetConfiguration",
+        "method": "GET",
+        "urlTemplate": "/configuration"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/get-getconfiguration')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), parameters('FunctionAppName'))]",
+        "[resourceId('Microsoft.ApiManagement/service/apis/schemas', parameters('ApimServiceName'), parameters('FunctionAppName'), '1572599479291')]"
+      ]
+    },
+    {
+      "properties": {
+        "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('FunctionAppName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "rawxml"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/get-getconfiguration/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('ApimServiceName'), parameters('FunctionAppName'), 'get-getconfiguration')]"
+      ]
+    },
+    {
+      "properties": {
+        "templateParameters": [
+          {
+            "name": "sessionId",
+            "description": "Identifier for the session to retrieve",
+            "type": "string",
+            "required": true,
+            "values": []
+          }
+        ],
+        "description": "",
+        "request": {
+          "queryParameters": [],
+          "headers": [],
+          "representations": []
+        },
+        "responses": [
+          {
+            "statusCode": 200,
+            "description": "Session details",
+            "headers": [],
+            "representations": [
+              {
+                "contentType": "application/json",
+                "sample": "{\r\n  \"id\": \"testid2\",\r\n  \"sessionId\": \"testid2\",\r\n  \"sessionName\": \"name of the session\",\r\n  \"lastReleasedQuestionId\": \"2\",\r\n  \"questions\": [\r\n    {\r\n      \"title\": \"This is the first question\",\r\n      \"id\": \"1\",\r\n      \"isReleased\": false,\r\n      \"answerOptions\": [\r\n        {\r\n          \"id\": \"1\",\r\n          \"title\": \"answer option 1 - from third question\"\r\n        },\r\n        {\r\n          \"id\": \"2\",\r\n          \"title\": \"answer option 2 - from third question\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+                "schemaId": "1572599479291",
+                "typeName": "SessionDetails"
+              }
+            ]
+          },
+          {
+            "statusCode": 404,
+            "description": "Session not found",
+            "headers": [],
+            "representations": []
+          }
+        ],
+        "displayName": "GetSession",
+        "method": "GET",
+        "urlTemplate": "/sessions/{sessionId}"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/get-getsession')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), parameters('FunctionAppName'))]",
+        "[resourceId('Microsoft.ApiManagement/service/apis/schemas', parameters('ApimServiceName'), parameters('FunctionAppName'), '1572599479291')]"
+      ]
+    },
+    {
+      "properties": {
+        "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"',  parameters('FunctionAppName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "rawxml"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/get-getsession/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('ApimServiceName'), parameters('FunctionAppName'), 'get-getsession')]"
+      ]
+    },
+    {
+      "properties": {
+        "templateParameters": [
+          {
+            "name": "sessionId",
+            "description": "Identifier for the session to get results for",
+            "type": "string",
+            "required": true,
+            "values": []
+          }
+        ],
+        "description": "",
+        "request": {
+          "queryParameters": [],
+          "headers": [],
+          "representations": []
+        },
+        "responses": [
+          {
+            "statusCode": 200,
+            "description": "Session results",
+            "headers": [],
+            "representations": [
+              {
+                "contentType": "application/json",
+                "sample": "{\r\n  \"type\": \"SessionResult\",\r\n  \"id\": \"sessionresults-6d603f60-f8a4-11e9-bacb-55a8d69140b3\",\r\n  \"partitionId\": null,\r\n  \"sessionId\": \"6d603f60-f8a4-11e9-bacb-55a8d69140b3\",\r\n  \"sessionName\": \"test\",\r\n  \"questions\": [\r\n    {\r\n      \"title\": \"test\",\r\n      \"questionId\": \"27c1ccf0-f8a7-11e9-bd24-071cbadd9df7\",\r\n      \"answerOptions\": [\r\n        {\r\n          \"id\": \"2\",\r\n          \"title\": null,\r\n          \"voteCount\": 2\r\n        }\r\n      ]\r\n    },\r\n    {\r\n      \"title\": \"how are we feeling today?\",\r\n      \"questionId\": \"55e700a0-f8a7-11e9-bd24-071cbadd9df7\",\r\n      \"answerOptions\": [\r\n        {\r\n          \"id\": \"3\",\r\n          \"title\": null,\r\n          \"voteCount\": 1\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}",
+                "schemaId": "1572599479291",
+                "typeName": "SessionResults"
+              }
+            ]
+          },
+          {
+            "statusCode": 404,
+            "description": "Session results not found",
+            "headers": [],
+            "representations": []
+          }
+        ],
+        "displayName": "GetSessionResults",
+        "method": "GET",
+        "urlTemplate": "/sessions/{sessionId}/results"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/get-getsessionresults')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), parameters('FunctionAppName'))]",
+        "[resourceId('Microsoft.ApiManagement/service/apis/schemas', parameters('ApimServiceName'), parameters('FunctionAppName'), '1572599479291')]"
+      ]
+    },
+    {
+      "properties": {
+        "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('FunctionAppName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "rawxml"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/get-getsessionresults/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('ApimServiceName'),  parameters('FunctionAppName'), 'get-getsessionresults')]"
+      ]
+    },
+    {
+      "properties": {
+        "templateParameters": [
+          {
+            "name": "sessionId",
+            "description": "Identifier of session for which to retrieve summary",
+            "type": "string",
+            "required": true,
+            "values": []
+          }
+        ],
+        "description": "Gets summary of session.  Does not contain all questions in the session but just last released question.",
+        "request": {
+          "queryParameters": [],
+          "headers": [],
+          "representations": []
+        },
+        "responses": [
+          {
+            "statusCode": 200,
+            "description": "Session summary retrieved",
+            "headers": [],
+            "representations": [
+              {
+                "contentType": "application/json",
+                "sample": "{\r\n  \"sessionId\": \"testid2\",\r\n  \"sessionName\": \"name of the session\",\r\n  \"lastReleasedQuestion\": \"2\"\r\n}",
+                "schemaId": "1572599479291",
+                "typeName": "SessionSummary"
+              }
+            ]
+          },
+          {
+            "statusCode": 404,
+            "description": "Session not found",
+            "headers": [],
+            "representations": []
+          }
+        ],
+        "displayName": "GetSessionSummary",
+        "method": "GET",
+        "urlTemplate": "/sessions/{sessionId}/summary"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/',  parameters('FunctionAppName'), '/get-getsessionsummary')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'),  parameters('FunctionAppName'))]",
+        "[resourceId('Microsoft.ApiManagement/service/apis/schemas', parameters('ApimServiceName'),  parameters('FunctionAppName'), '1572599479291')]"
+      ]
+    },
+    {
+      "properties": {
+        "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('FunctionAppName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "rawxml"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/get-getsessionsummary/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('ApimServiceName'),  parameters('FunctionAppName'), 'get-getsessionsummary')]"
+      ]
+    },
+    {
+      "properties": {
+        "templateParameters": [
+          {
+            "name": "sessionId",
+            "description": "Identifier for session",
+            "type": "string",
+            "required": true,
+            "values": []
+          },
+          {
+            "name": "userId",
+            "description": "Identifier for current user",
+            "type": "string",
+            "required": true,
+            "values": []
+          }
+        ],
+        "description": "Endpoint for client to retrieve token to establish session with Azure Signalr service.  This is the url given to the SignalR javascript client and normally gets returned by the call to \"SubscribeForUpdates\"",
+        "request": {
+          "queryParameters": [],
+          "headers": [],
+          "representations": []
+        },
+        "responses": [],
+        "displayName": "negotiate",
+        "method": "POST",
+        "urlTemplate": "/sessions/{sessionId}/signalr/{userId}/negotiate"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/post-negotiate')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), parameters('FunctionAppName'))]"
+      ]
+    },
+    {
+      "properties": {
+        "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('FunctionAppName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "rawxml"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/post-negotiate/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('ApimServiceName'), parameters('FunctionAppName'), 'post-negotiate')]"
+      ]
+    },
+    {
+      "properties": {
+        "templateParameters": [
+          {
+            "name": "sessionId",
+            "description": "Identifier for session in which to release a question",
+            "type": "string",
+            "required": true,
+            "values": []
+          },
+          {
+            "name": "questionId",
+            "description": "Identifier for the question to release",
+            "type": "string",
+            "required": true,
+            "values": []
+          }
+        ],
+        "description": "Release a question to participants so it becomes available for answering.",
+        "request": {
+          "queryParameters": [],
+          "headers": [],
+          "representations": []
+        },
+        "responses": [
+          {
+            "statusCode": 200,
+            "description": "Question released",
+            "headers": [],
+            "representations": []
+          },
+          {
+            "statusCode": 400,
+            "description": "Question was already released; invalid question id was provided or invalid session id provided.",
+            "headers": [],
+            "representations": []
+          }
+        ],
+        "displayName": "ReleaseQuestion",
+        "method": "POST",
+        "urlTemplate": "/sessions/{sessionId}/questions/{questionId}/release"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/post-releasequestion')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), parameters('FunctionAppName'))]"
+      ]
+    },
+    {
+      "properties": {
+        "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('FunctionAppName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "rawxml"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/post-releasequestion/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('ApimServiceName'), parameters('FunctionAppName'), 'post-releasequestion')]"
+      ]
+    },
+    {
+      "properties": {
+        "templateParameters": [
+          {
+            "name": "sessionId",
+            "description": "Identifier for the session in which to submit the answer",
+            "type": "string",
+            "required": true,
+            "values": []
+          },
+          {
+            "name": "questionid",
+            "description": "Identifier for the question to submit the answer to",
+            "type": "string",
+            "required": true,
+            "values": []
+          },
+          {
+            "name": "userId",
+            "description": "Identifier for the user which is submitting the answer",
+            "type": "string",
+            "required": true,
+            "values": []
+          }
+        ],
+        "description": "Submits an answer to a previously released question",
+        "request": {
+          "description": "Answer details",
+          "queryParameters": [],
+          "headers": [],
+          "representations": [
+            {
+              "contentType": "application/json",
+              "sample": "{\r\n\t\"answerid\": \"1\"\r\n}",
+              "schemaId": "1572599479291",
+              "typeName": "AnswerSubmission"
+            }
+          ]
+        },
+        "responses": [
+          {
+            "statusCode": 200,
+            "description": "Answer submitted",
+            "headers": [],
+            "representations": []
+          },
+          {
+            "statusCode": 400,
+            "description": "Invalid answer id or invalid answer submission details.",
+            "headers": [],
+            "representations": []
+          }
+        ],
+        "displayName": "SubmitAnswer",
+        "method": "POST",
+        "urlTemplate": "/sessions/{sessionId}/questions/{questionid}/answers/{userId}"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/post-submitanswer')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), parameters('FunctionAppName'))]",
+        "[resourceId('Microsoft.ApiManagement/service/apis/schemas', parameters('ApimServiceName'), parameters('FunctionAppName'), '1572599479291')]"
+      ]
+    },
+    {
+      "properties": {
+        "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('FunctionAppName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "rawxml"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/post-submitanswer/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('ApimServiceName'), parameters('FunctionAppName'), 'post-submitanswer')]"
+      ]
+    },
+    {
+      "properties": {
+        "templateParameters": [
+          {
+            "name": "sessionId",
+            "description": "Identifier for the session in which to subscribe for updates",
+            "type": "string",
+            "required": true,
+            "values": []
+          },
+          {
+            "name": "userId",
+            "description": "Identifier for the user which is subscribing to updates on the session",
+            "type": "string",
+            "required": true,
+            "values": []
+          }
+        ],
+        "description": "Subscribe to updates on a given session.  This removes the user from all previous groups to which he/she was subscribed and adds him/her to the subscription group for the provided session.  In the result of this calls provides the URL where the Signalr client can go negotiate the connection.",
+        "request": {
+          "queryParameters": [],
+          "headers": [],
+          "representations": []
+        },
+        "responses": [
+          {
+            "statusCode": 200,
+            "description": "Pointer to where the Signalr client can go negotiate the connection",
+            "headers": [],
+            "representations": [
+              {
+                "contentType": "application/json",
+                "sample": "[concat('{\r\n  \"signalRNegotiateBaseUrl\": \"https://', parameters('FunctionAppName'), '.azurewebsites.net/api/sessions/testid2/signalr/{userId}\"\r\n}')]",
+                "schemaId": "1572599479291",
+                "typeName": "SubscriptionnResponse"
+              }
+            ]
+          }
+        ],
+        "displayName": "SubscribeForUpdates",
+        "method": "POST",
+        "urlTemplate": "/sessions/{sessionId}/signalr/{userId}/subscribe"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/post-subscribeforupdates')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), parameters('FunctionAppName'))]",
+        "[resourceId('Microsoft.ApiManagement/service/apis/schemas', parameters('ApimServiceName'), parameters('FunctionAppName'), '1572599479291')]"
+      ]
+    },
+    {
+      "properties": {
+        "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('FunctionAppName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "rawxml"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/post-subscribeforupdates/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('ApimServiceName'), parameters('FunctionAppName'), 'post-subscribeforupdates')]"
+      ]
+    },
+    {
+      "properties": {
+        "value": "[concat('<!--\n    IMPORTANT:\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\n    - To remove a policy, delete the corresponding policy statement from the policy document.\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\n    - Remove the <base> element to prevent inheriting policies from the corresponding section element in the enclosing scope.\n    - Policies are applied in the order of their appearance, from the top down.\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\n-->\r\n<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<cors allow-credentials=\"true\">\r\n\t\t\t<allowed-origins>\r\n\t\t\t\t<origin>http://localhost:8080</origin>\r\n\t\t\t\t<origin>https://localhost:8080</origin>\r\n\t\t\t\t<origin>', parameters('CorsUrl'),  '/</origin>\r\n\t\t\t</allowed-origins>\r\n\t\t\t<allowed-methods>\r\n\t\t\t\t<method>*</method>\r\n\t\t\t</allowed-methods>\r\n\t\t\t<allowed-headers>\r\n\t\t\t\t<header>*</header>\r\n\t\t\t</allowed-headers>\r\n\t\t\t<expose-headers>\r\n\t\t\t\t<header>*</header>\r\n\t\t\t</expose-headers>\r\n\t\t</cors>\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "rawxml"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('FunctionAppName'), '/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), parameters('FunctionAppName'))]"
+      ]
+    }
+  ]
+}

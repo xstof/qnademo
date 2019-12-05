@@ -1,0 +1,14 @@
+{
+  "id": "testid-1-myuserid",
+  "partitionId": "session-testid",
+  "type": "Answer",
+  "sessionId": "testid",
+  "questionId": "1",
+  "answerId": "1",
+  "userId": "myuserid",
+  "_rid": "K9RPAJhcMaGChB4AAAAAAA==",
+  "_self": "dbs/K9RPAA==/colls/K9RPAJhcMaE=/docs/K9RPAJhcMaGChB4AAAAAAA==/",
+  "_etag": "\"2e005b74-0000-0d00-0000-5db2a72a0000\"",
+  "_attachments": "attachments/",
+  "_ts": 1571989290
+}

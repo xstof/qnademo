@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "ApimServiceName": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "properties": {
+        "tags": [
+          "key",
+          "function",
+          "auto"
+        ],
+        "secret": true,
+        "displayName": "qna-func-weur-key",
+        "value": "zdqbX33+SAhVN39mhzu5cgRNHyLAWvqCsdeJ7rIssW65OZLUsr29Rw=="
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/qna-func-weur-key')]",
+      "type": "Microsoft.ApiManagement/service/properties",
+      "apiVersion": "2019-01-01"
+    }
+  ]
+}

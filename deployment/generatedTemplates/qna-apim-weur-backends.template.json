@@ -1,0 +1,29 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "ApimServiceName": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "properties": {
+        "description": "qna-func-weur",
+        "resourceId": "https://management.azure.com/subscriptions/33761810-ec30-441e-ad3e-50f029e977f7/resourceGroups/qna-weur/providers/Microsoft.Web/sites/qna-func-weur",
+        "credentials": {
+          "header": {
+            "x-functions-key": [
+              "{{qna-func-weur-key}}"
+            ]
+          }
+        },
+        "url": "https://qna-func-weur.azurewebsites.net/api",
+        "protocol": "http"
+      },
+      "name": "[concat(parameters('ApimServiceName'), '/qna-func-weur')]",
+      "type": "Microsoft.ApiManagement/service/backends",
+      "apiVersion": "2019-01-01"
+    }
+  ]
+}
