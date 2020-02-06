@@ -5,4 +5,4 @@ WORKDIR /app
 COPY $sourcelocation .
 RUN yarn global add @quasar/cli
 RUN yarn
-RUN quasar build
+RUN sudo quasar build
