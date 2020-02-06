@@ -2,7 +2,7 @@
 name: 'Quasar-Build'
 description: 'Build a quasar app'
 inputs:
-  source-location:  
+  sourcelocation:  
     description: 'Location of the quasar app'
     required: true
     default: './'
@@ -13,4 +13,4 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.source-location }}
+    - ${{ inputs.sourcelocation }}
