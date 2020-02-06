@@ -1,11 +1,8 @@
 # develop stage
 FROM node:13.7-alpine as develop-stage
+ARG source-location
 WORKDIR /app
-COPY package*.json ./
+COPY ${source-location} .
 RUN yarn global add @quasar/cli
-COPY . .
-
-# build stage
-FROM develop-stage as build-stage
 RUN yarn
 RUN quasar build
