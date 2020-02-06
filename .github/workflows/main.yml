@@ -11,7 +11,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build-Quasar
-        uses: ./gh-action-build-frontend # Uses an action in the root directory
+        uses: ${{ GITHUB_WORKSPACE }}/gh-action-build-frontend # Uses an action in the root directory
         id: build-quasar
         with:
           sourcelocation: './qnademo/qna'
