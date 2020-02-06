@@ -16,5 +16,5 @@ jobs:
         uses: ./gh-action-build-frontend # Uses an action in the root directory
         id: build-quasar
         with:
-          sourcelocation: ./qnademo/qnademo/qna
+          sourcelocation: ./qna
       # Use the output from the `hello` step
