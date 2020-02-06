@@ -4,15 +4,15 @@ on: [push]
 
 jobs:
   build:
-
-    runs-on: windows-latest
-
+    runs-on: ubuntu-latest
+    name: 'Build-Quasar-Frontend'
     steps:
-    - uses: actions/checkout@v2
-      name: checkout the code
-    - name: Run a one-line script
-      run: echo Hello, world!
-    - name: Run a multi-line script
-      run: |
-        echo Add other actions to build,
-        echo test, and deploy your project.
+      # To use this repository's private action, you must check out the repository
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build-Quasar
+        uses: ./gh-action-build-frontend # Uses an action in the root directory
+        id: build-quasar
+        # with:
+          # who-to-greet: 'Mona the Octocat'
+      # Use the output from the `hello` step
