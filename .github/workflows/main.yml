@@ -10,6 +10,8 @@ jobs:
       # To use this repository's private action, you must check out the repository
       - name: Checkout
         uses: actions/checkout@v2
+      - name: listdir
+        run: 'ls'
       - name: Build-Quasar
         uses: ./gh-action-build-frontend # Uses an action in the root directory
         id: build-quasar
