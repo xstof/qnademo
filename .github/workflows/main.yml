@@ -13,6 +13,6 @@ jobs:
       - name: Build-Quasar
         uses: ./gh-action-build-frontend # Uses an action in the root directory
         id: build-quasar
-        # with:
-          # who-to-greet: 'Mona the Octocat'
+        with:
+          sourcelocation: './qna'
       # Use the output from the `hello` step
