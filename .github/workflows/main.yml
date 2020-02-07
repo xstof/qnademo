@@ -3,14 +3,14 @@ name: CI
 on: [push]
 
 jobs:
-  build:
+  build-frontend:
     runs-on: ubuntu-latest
     name: 'Build-Quasar-Frontend'
     steps:
       # To use this repository's private action, you must check out the repository
       - name: Checkout
         uses: actions/checkout@v2
-      - name: listdir
+      - name: List-Dir
         run: 'ls'
       - name: Build-Quasar
         uses: ./gh-action-build-quasar # Uses an action in the root directory
@@ -24,3 +24,12 @@ jobs:
           name: spa
           # Directory containing files to upload
           path: ./qna/dist/spa
+  build-functions:
+    runs-on: [windows-latest]
+    name: 'Build-Fn-Backend'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build-And-Package-Functions
+        run: .\deployment\package-functionapp-to-zip.ps1
+        
