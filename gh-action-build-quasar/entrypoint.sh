@@ -8,4 +8,7 @@ if [ -n "${WORK_DIR}" ]; then
   cd $WORK_DIR
 fi
 
+# Display contents of working dir
+echo "::debug $(ls)"
+
 exec $@
