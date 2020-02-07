@@ -23,4 +23,4 @@ jobs:
           # Artifact name
           name: spa
           # Directory containing files to upload
-          path: /github/workspace/qna/dist/spa
+          path: ./qna/dist/spa
