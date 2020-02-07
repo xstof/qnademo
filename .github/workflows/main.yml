@@ -33,4 +33,11 @@ jobs:
       - name: Build-And-Package-Functions
         shell: pwsh
         run: cd .\deployment ; .\package-functionapp-to-zip.ps1
+      - name: Upload Functions package as artifact
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          # Artifact name
+          name: functions
+          # Directory containing files to upload
+          path: ./functionpackage/qna-fn-backend.zip
         
