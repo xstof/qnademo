@@ -16,5 +16,5 @@ jobs:
         uses: ./gh-action-build-quasar # Uses an action in the root directory
         id: build-quasar
         with:
-          sourcelocation: ./qna
+          sourcelocation: /github/workspace/qna
       # Use the output from the `hello` step
