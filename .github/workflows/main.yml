@@ -17,4 +17,10 @@ jobs:
         id: build-quasar
         with:
           sourcelocation: /github/workspace/qna
-      # Use the output from the `hello` step
+      - name: Upload SPA files as artifact
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          # Artifact name
+          name: spa
+          # Directory containing files to upload
+          path: /github/workspace/qna/dist/spa
