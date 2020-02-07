@@ -13,7 +13,7 @@ jobs:
       - name: listdir
         run: 'ls'
       - name: Build-Quasar
-        uses: ./gh-action-build-frontend # Uses an action in the root directory
+        uses: ./gh-action-build-quasar # Uses an action in the root directory
         id: build-quasar
         with:
           sourcelocation: ./qna
