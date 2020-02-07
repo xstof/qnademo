@@ -31,5 +31,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build-And-Package-Functions
-        run: .\deployment\package-functionapp-to-zip.ps1
+        shell: pwsh
+        run: cd .\deployment ; .\deployment\package-functionapp-to-zip.ps1
         
