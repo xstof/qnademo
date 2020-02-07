@@ -39,5 +39,5 @@ jobs:
           # Artifact name
           name: functions
           # Directory containing files to upload
-          path: ./functionpackage/qna-fn-backend.zip
+          path: ./deployment/functionpackage/qna-fn-backend.zip
         
