@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 
 echo "::debug current directory $(pwd)"
 
