@@ -43,4 +43,13 @@ jobs:
           name: functions
           # Directory containing files to upload
           path: ./deployment/functionpackage/qna-fn-backend.zip
-        
+  deploy-arm-templates:
+    needs: [build-frontend, build-functions]
+    runs-on: ubuntu-latest
+    name: Deploy-Arm-Templates
+    steps:
+      - name: Login-To-Azure
+        uses: Azure/login@v1
+        with:
+          # Paste output of `az ad sp create-for-rbac` as value of secret variable: AZURE_CREDENTIALS
+          creds: $AZURE_CREDENTIALS
