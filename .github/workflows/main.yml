@@ -49,7 +49,8 @@ jobs:
     container:
       image: azuresdk/azure-powershell-core # => run step in container, as documented here: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idcontainer
       volumes: 
-        - /home/runner/work/qnademo/qnademo:/mycode
+        - .:/mycode
+        #- /home/runner/work/qnademo/qnademo:/mycode
     name: Deploy-Arm-Templates
     steps:
       # - name: CLI-Login-To-Azure
