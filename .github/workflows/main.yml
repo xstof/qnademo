@@ -48,8 +48,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: azuresdk/azure-powershell-core # => run step in container, as documented here: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idcontainer
-      volumes: 
-        - /home/runner/work/qnademo/qnademo:/github/workspace
+      #volumes: 
+      #  - /home/runner/work/qnademo/qnademo:/github/workspace
     name: Deploy-Arm-Templates
     steps:
       # - name: CLI-Login-To-Azure
@@ -72,7 +72,7 @@ jobs:
       - name: Deploy-ARM-Template
         shell: pwsh
         run: |
-          cd /github/workspace/deployment ;
+          # cd /github/workspace/deployment ;
           ./deploy-infra -NameRGForNestedTemplates 'qna-qa-infra' -LocationRGForNestedTemplates westeurope  -NameStorageAcctForNestedTemplates qnaqastornestedtempl -ResourceGroupPrefix qna-qa -ArtifactPrefix qnaqa -AADClientId 'd03fc97e-cc4e-4758-944a-43fe4cf3eecc' -AADB2CIssuer 'https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_susi' ;
           
           
