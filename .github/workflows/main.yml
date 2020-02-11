@@ -70,6 +70,8 @@ jobs:
           # Change active subscription:
           # $context = Get-AzSubscription -SubscriptionId '33761810-ec30-441e-ad3e-50f029e977f7'
           # Set-AzContext $context
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Deploy-ARM-Template
         shell: pwsh
         run: |
