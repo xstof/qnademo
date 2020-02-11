@@ -46,6 +46,7 @@ jobs:
   deploy-arm-templates:
     needs: [build-frontend, build-functions]
     runs-on: ubuntu-latest
+    container: azuresdk/azure-powershell-core # => run step in container, as documented here: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idcontainer
     name: Deploy-Arm-Templates
     steps:
       # - name: CLI-Login-To-Azure
