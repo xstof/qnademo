@@ -74,7 +74,7 @@ jobs:
         run: |
           echo $(ls) ;
           echo $(ls /__w) ;
-          cd /__w/qnademo
+          cd /__w/qnademo ;
           echo 'switched to __w/qndemo' ;
           echo $(ls) ;
           cd /__w/qnademo/qnademo/deployment ;
