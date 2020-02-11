@@ -73,14 +73,14 @@ jobs:
       - name: Deploy-ARM-Template
         shell: pwsh
         run: |
-          echo $(ls) ;
-          echo $(ls /__w) ;
-          cd /__w/qnademo ;
-          echo 'switched to __w/qndemo' ;
-          echo $(ls) ;
-          cd /__w/qnademo/qnademo ;
-          echo 'switched to /__w/qndemo/qnademo' ;
-          echo $(ls) ;
+          # echo $(ls) ;
+          # echo $(ls /__w) ;
+          # cd /__w/qnademo ;
+          # echo 'switched to __w/qndemo' ;
+          # echo $(ls) ;
+          # cd /__w/qnademo/qnademo ;
+          # echo 'switched to /__w/qndemo/qnademo' ;
+          # echo $(ls) ;
           # cd /mycode ;
           # echo 'switched to /mycode' ;
           # echo $(ls) ;
