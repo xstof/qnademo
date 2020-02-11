@@ -57,6 +57,7 @@ jobs:
       - name: PWSH-Login-To-Azure
         shell: pwsh
         run: |
+          Add-Type -Path "/usr/local/share/powershell/Modules/Az.Profile/PreloadAssemblies/Microsoft.IdentityModel.Clients.ActiveDirectory.dll" ;
           Import-Module Az.Profile -Force ;
           $Password = ConvertTo-SecureString ${{ secrets.SP_PROD_DEPL_PWD }} -AsPlainText -Force ;
           $Creds = New-Object System.Management.Automation.PSCredential( '${{ secrets.SP_PROD_DEPL_APPID }}', $Password) ;
