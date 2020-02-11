@@ -62,7 +62,7 @@ jobs:
         shell: pwsh
         run: |
           # Install Powershell Az Module:
-          Install-Module -Name Az -AllowClobber -Scope CurrentUser ;
+          Install-Module -Name Az -AllowClobber -Scope CurrentUser -SkipPublisherCheck -AcceptLicense -Force ;
           # Login to Azure:
           Add-Type -Path "/usr/local/share/powershell/Modules/Az.Profile/PreloadAssemblies/Microsoft.IdentityModel.Clients.ActiveDirectory.dll" ;
           Import-Module Az.Profile -Force ;
