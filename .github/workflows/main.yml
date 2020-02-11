@@ -57,6 +57,6 @@ jobs:
         shell: pwsh
         run: |
           $Password = ConvertTo-SecureString ${{ secrets.SP_PROD_DEPL_PWD }} -AsPlainText -Force ;
-          $Creds = New-Object System.Management.Automation.PSCredential( ${{ secrets.SP_PROD_DEPL_APPID }}, $Password) ;
+          $Creds = New-Object System.Management.Automation.PSCredential( '${{ secrets.SP_PROD_DEPL_APPID }}', $Password) ;
           Connect-AzAccount -ServicePrincipal -SubscriptionId '33761810-ec30-441e-ad3e-50f029e977f7' -TenantId '72f988bf-86f1-41af-91ab-2d7cd011db47' -Credential $Creds ;
           
