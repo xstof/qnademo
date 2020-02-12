@@ -210,7 +210,7 @@
                     "uri": "[concat(parameters('artifactsLocation'), '/nestedtemplates/apim-backends-template.json', parameters('artifactsLocationSasToken'))]",
                     "contentVersion": "1.0.0.0"
                 },
-                "parameters": {
+                "parameters": { 
                     "ApimServiceName": {
                         "value": "[variables('apimName')]"
                     },
