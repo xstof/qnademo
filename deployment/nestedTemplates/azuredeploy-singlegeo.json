@@ -226,7 +226,8 @@
                 }
             },
             "dependsOn": [
-                "[concat('deploy-region-', parameters('region'), '-apim')]"
+                "[concat('deploy-region-', parameters('region'), '-apim')]",
+                "[concat('deploy-region-', parameters('region'), '-functionapp')]"
             ]
         },
         {
