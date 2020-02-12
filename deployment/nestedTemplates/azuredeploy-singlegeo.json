@@ -221,7 +221,7 @@
                         "value": "[concat('https://management.azure.com', resourceId('Microsoft.Web/sites', variables('functionAppName')))]"
                     },
                     "FunctionsKey": {
-                        "value": "[listkeys(concat(resourceId('Microsoft.Web/sites/host/', variables('functionAppName')), 'default'), '2018-11-01').masterKey]"
+                        "value": "[listkeys(resourceId('Microsoft.Web/sites/host/', variables('functionAppName'), 'default'), '2018-11-01').masterKey]"
                     },
                     "FunctionResourceUrl": {
                         "value": "[concat('https://', variables('functionAppName'), '.azurewebsites.net/api')]" 
