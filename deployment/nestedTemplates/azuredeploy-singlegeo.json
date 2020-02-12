@@ -165,8 +165,7 @@
                 }
             },
             "dependsOn": [
-                "[concat('deploy-region-', parameters('region'), '-signalr')]",
-                "[concat('deploy-region-', parameters('region'), '-apim')]"
+                "[concat('deploy-region-', parameters('region'), '-signalr')]"
             ]
         },
         {
@@ -196,7 +195,10 @@
                         "value": "[variables('apimPublisherName')]"
                     }
                 }
-            }
+            },
+            "dependsOn":[
+                "[concat('deploy-region-', parameters('region'), '-functionapp')]"
+            ]
         },
         {
             "name": "[concat('deploy-region-', parameters('region'), '-apim-backends')]",
