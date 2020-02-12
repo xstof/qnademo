@@ -189,7 +189,7 @@
                         "value": "[variables('apimName')]"
                     },             
                     "publisherEmail": {
-                        "value": "[variables('apimPublisherEmail')]"
+                        "value": "[variables('apimPublisherEmail')]" 
                     },
                     "publisherName": {
                         "value": "[variables('apimPublisherName')]"
