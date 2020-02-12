@@ -230,9 +230,9 @@
             },
             "dependsOn": [
                 "[concat('deploy-region-', parameters('region'), '-apim')]",
-                "[concat('deploy-region-', parameters('region'), '-functionapp')]",
+                "[concat('deploy-region-', parameters('region'), '-functionapp')]"
                 //added this one in - now apim-api's get deployed first, then apim-backends
-                "[concat('deploy-region-', parameters('region'), '-apim-apis')]"
+                //"[concat('deploy-region-', parameters('region'), '-apim-apis')]"
             ]
         },
         {
@@ -259,9 +259,9 @@
             },
             "dependsOn": [
                 // added this in:
-                "[concat('deploy-region-', parameters('region'), '-apim')]",
-                "[concat('deploy-region-', parameters('region'), '-functionapp')]"
-                //"[concat('deploy-region-', parameters('region'), '-apim-backends')]"
+                // "[concat('deploy-region-', parameters('region'), '-apim')]",
+                // "[concat('deploy-region-', parameters('region'), '-functionapp')]"
+                "[concat('deploy-region-', parameters('region'), '-apim-backends')]"
             ]
         }
     ],
