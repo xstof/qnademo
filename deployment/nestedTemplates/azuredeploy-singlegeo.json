@@ -165,7 +165,8 @@
                 }
             },
             "dependsOn": [
-                "[concat('deploy-region-', parameters('region'), '-signalr')]"
+                "[concat('deploy-region-', parameters('region'), '-signalr')]",
+                "[concat('deploy-region-', parameters('region'), '-apim')]"
             ]
         },
         {
