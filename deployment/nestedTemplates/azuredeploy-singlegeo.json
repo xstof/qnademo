@@ -121,7 +121,7 @@
                 }
             },
             "dependsOn": [
-                "[concat('deploy-region-', parameters('region'), '-apim-backends')]"
+                
             ]
         },
         {
