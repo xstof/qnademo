@@ -178,7 +178,7 @@
                     "uri": "[concat(parameters('artifactsLocation'), '/nestedtemplates/apim-template.json', parameters('artifactsLocationSasToken'))]",
                     "contentVersion": "1.0.0.0"
                 },
-                "parameters": { 
+                "parameters": {
                     "artifactsLocation": {
                         "value": "[parameters('artifactsLocation')]"
                     },
