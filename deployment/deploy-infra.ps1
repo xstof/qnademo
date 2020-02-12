@@ -37,7 +37,7 @@ Write-Output "Storage Account created"
 
 # upload nested templates
 Write-Output "Creating storage container for nested templates: '$NestedTemplatesStorageContainerName'"
-New-AzStorageContainer -Name $NestedTemplatesStorageContainerName -Context $StorageContext -WarningAction SilentlyContinue
+New-AzStorageContainer -Name $NestedTemplatesStorageContainerName -Context $StorageContext -ErrorAction SilentlyContinue
 Write-Output "Storage container created"
 Write-Output "Uploading nested templates"
 Get-ChildItem "./nestedTemplates" -File -Recurse | Set-AzStorageBlobContent -Context $StorageContext -Container $NestedTemplatesStorageContainerName -ErrorAction SilentlyContinue -Force
