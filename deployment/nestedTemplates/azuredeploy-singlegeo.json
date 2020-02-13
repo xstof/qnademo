@@ -166,8 +166,8 @@
                 }
             },
             "dependsOn": [
-                "[concat('deploy-region-', parameters('region'), '-signalr')]",
-                "[concat('deploy-region-', parameters('region'), '-apim')]" // not strictly needed, but in this way it takes longer and the signalrconnectionstring will be ready by then (race condition)
+                "[concat('deploy-region-', parameters('region'), '-signalr')]"
+                // "[concat('deploy-region-', parameters('region'), '-apim')]" // not strictly needed, but in this way it takes longer and the signalrconnectionstring will be ready by then (race condition)
             ]
         },
         {
