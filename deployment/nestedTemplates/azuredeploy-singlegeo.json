@@ -151,7 +151,8 @@
                         "value": "[parameters('cosmosconnectionstring')]"
                     },
                     "signalrconnectionstring": {
-                        "value": "[listKeys(resourceId('Microsoft.SignalRService/SignalR', variables('signalrName')), providers('Microsoft.SignalRService','SignalR').apiVersions[0]).primaryConnectionString]"
+                        // "value": "[listKeys(resourceId('Microsoft.SignalRService/SignalR', variables('signalrName')), providers('Microsoft.SignalRService','SignalR').apiVersions[0]).primaryConnectionString]"
+                        "value": "xxxx"
                     },
                     "urlToWhitelistForCORS": {
                         "value": "[concat('https://', parameters('frontDoorName'), '.azurefd.net')]"
