@@ -221,7 +221,10 @@
                         "value": "[concat('https://management.azure.com', resourceId('Microsoft.Web/sites', variables('functionAppName')))]"
                     },
                     "FunctionsKey": {
-                        "value": "[listkeys(resourceId('Microsoft.Web/sites/host/', variables('functionAppName'), 'default'), '2018-11-01').masterKey]"
+                        // listkeys can fail the ARM template as not guaranteed available as soon as template for function completed
+                        // not really needed in this scenario anyway - all functions are either open or protected over oauth2
+                        // "value": "[listkeys(resourceId('Microsoft.Web/sites/host/', variables('functionAppName'), 'default'), '2018-11-01').masterKey]"
+                        "value": "xxxx"
                     },
                     "FunctionResourceUrl": {
                         "value": "[concat('https://', variables('functionAppName'), '.azurewebsites.net/api')]" 
