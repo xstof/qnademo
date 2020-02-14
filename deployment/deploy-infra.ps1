@@ -65,14 +65,17 @@ ForEach ($deploy in $regionDeploys){
   # Get Function App Settings:
   $functionApp = Get-AzWebApp -ResourceGroupName $deploy.resourceGroup -Name $functionName
   $functionAppSettings = $functionApp.SiteConfig.AppSettings
+  $hashTableWithSettings = @{}
   ForEach ($item in $functionAppSettings){
-    if ($item.Name -eq "AzureSignalRConnectionString") {
-      $item.Value = $key.PrimaryConnectionString      
+    if ($item.Name -eq "AzureSignalRConnectionString") {    
+      $hashTableWithSettings[$item.Name] = $key.PrimaryConnectionString
+    } else {
+      $hashTableWithSettings[$item.Name] = $item.Value
     }
   }
 
   # Set Function App Settings:
-  Set-AzWebApp -ResourceGroupName $deploy.resourceGroup -Name $functionName -AppSettings $functionAppSettings
+  Set-AzWebApp -ResourceGroupName $deploy.resourceGroup -Name $functionName -AppSettings $hashTableWithSettings
   Write-Output "changed function $functionName web app settings for SignalR to: $key"
 
 }
