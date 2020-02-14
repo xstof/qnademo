@@ -57,9 +57,25 @@ $regionDeploys = $(Get-AzDeployment -Name "qna-root-deployment").Outputs.regionD
 
 # update function settings for signalr
 Write-Output "Update functions with connection string settings for SignalR"
-# ForEach ($deploy in $regionDeploys){
-#   $key = Get-AzSignalRKey -ResourceGroupName $deploy.resourceGroup -Name mysignalr1
-# }
+ForEach ($deploy in $regionDeploys){
+  $signalRName = $deploy.signalrName
+  $functionName = $deploy.functionAppName
+  $key = Get-AzSignalRKey -ResourceGroupName $deploy.resourceGroup -Name $signalRName
+
+  # Get Function App Settings:
+  $functionApp = Get-AzWebApp -ResourceGroupName $deploy.resourceGroup -Name $functionName
+  $functionAppSettings = $functionApp.SiteConfig.AppSettings
+  ForEach ($item in $functionAppSettings){
+    if ($item.Name -eq "AzureSignalRConnectionString") {
+      $item.Value = $key.PrimaryConnectionString      
+    }
+  }
+
+  # Set Function App Settings:
+  Set-AzWebApp -ResourceGroupName $deploy.resourceGroup -Name -AppSettings $functionAppSettings
+  Write-Output "changed function $functionName web app settings for SignalR to: $key"
+
+}
 
 # create list of backend addresses for static assets
 $staticAssetsBackendAddresses = @()
