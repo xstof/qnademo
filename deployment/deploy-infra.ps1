@@ -73,6 +73,10 @@ Foreach($deploy in $regionDeploys){
   $functionAppBackendAddresses += $deploy.apimUrl
 }
 
+# create RG for deployment artifacts
+New-AzResourceGroup -Name "$($ResourceGroupPrefix)-fd" -Location $LocationRGForNestedTemplates -Force -ErrorAction SilentlyContinue
+
+# deploy frontdoor
 New-AzResourceGroupDeployment -ResourceGroupName "$($ResourceGroupPrefix)-fd" -Name "qna-fd-deployment" -TemplateFile "frontdoor-template.json" -frontDoorName "$($ArtifactPrefix)-frontdoor" -staticAssetsBackendAddresses $staticAssetsBackendAddresses -functionAppBackendAddresses $functionAppBackendAddresses
 
 return $InfraDeployment
