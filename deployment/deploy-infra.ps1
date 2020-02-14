@@ -72,7 +72,7 @@ ForEach ($deploy in $regionDeploys){
   }
 
   # Set Function App Settings:
-  Set-AzWebApp -ResourceGroupName $deploy.resourceGroup -Name -AppSettings $functionAppSettings
+  Set-AzWebApp -ResourceGroupName $deploy.resourceGroup -Name $functionName -AppSettings $functionAppSettings
   Write-Output "changed function $functionName web app settings for SignalR to: $key"
 
 }
