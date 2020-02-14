@@ -277,7 +277,7 @@
         },
         "state": {
             "type": "array",
-            "value": "[concat(array(json(concat('{\"resourceGroup\":\"',variables('resourceGroup'),'\",\"storageAccount\":\"', variables('storageAccountName'),'\",\"functionAppName\":\"', variables('functionAppName'), '\",\"apimUrl\":\"', variables('apimName'), '.azure-api.net\"' ,'}'))), parameters('state'))]"
+            "value": "[concat(array(json(concat('{\"resourceGroup\":\"',variables('resourceGroup'),'\",\"storageAccount\":\"', variables('storageAccountName'),'\",\"functionAppName\":\"', variables('functionAppName'), '\",\"apimUrl\":\"', variables('apimName'), '.azure-api.net\",\"signalrName\":\"', variables('signalrName'), '\"' ,'}'))), parameters('state'))]"
         }
     }
 }

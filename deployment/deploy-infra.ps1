@@ -52,8 +52,14 @@ $NestedTemplatesLocation = "https://$NameStorageAcctForNestedTemplates.blob.core
 # deploy template for storage accounts, functions in each geo
 $InfraDeployment = New-AzDeployment -Location $LocationForSubscriptionLevelDeployment -Name "qna-root-deployment" -TemplateFile "azuredeploy.json" -TemplateParameterFile "azuredeploy.parameters.json" -artifactsLocation $NestedTemplatesLocation -artifactsLocationSasToken $SasTokenForNestedTemplates -resourceGroupPrefix $ResourceGroupPrefix -artifactPrefix $ArtifactPrefix -aadClientId $AADClientId -aadB2cIssuer $AADB2CIssuer
 
-# deploy template for frontdoor
+# fetch what has been deployed
 $regionDeploys = $(Get-AzDeployment -Name "qna-root-deployment").Outputs.regionDeployments.Value | ConvertFrom-Json
+
+# update function settings for signalr
+Write-Output "Update functions with connection string settings for SignalR"
+# ForEach ($deploy in $regionDeploys){
+#   $key = Get-AzSignalRKey -ResourceGroupName $deploy.resourceGroup -Name mysignalr1
+# }
 
 # create list of backend addresses for static assets
 $staticAssetsBackendAddresses = @()
