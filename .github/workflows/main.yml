@@ -66,13 +66,13 @@ jobs:
           Import-Module Az.Profile -Force ;
           $Password = ConvertTo-SecureString ${{ secrets.SP_PROD_DEPL_PWD }} -AsPlainText -Force ;
           $Creds = New-Object System.Management.Automation.PSCredential( '${{ secrets.SP_PROD_DEPL_APPID }}', $Password) ;
-          Connect-AzAccount -ServicePrincipal -SubscriptionId '$SUBSCRIPTION_ID' -TenantId '$TENANT_ID' -Credential $Creds ;
+          Connect-AzAccount -ServicePrincipal -SubscriptionId '${{ env.SUBSCRIPTION_ID }}' -TenantId '${{ env.TENANT_ID }}' -Credential $Creds ;
       - name: Checkout
         uses: actions/checkout@v2
       - name: Deploy-ARM-Template
         shell: pwsh
         run: |
           cd deployment ;
-          ./deploy-infra -NameRGForNestedTemplates 'qna-qa-infra' -LocationRGForNestedTemplates westeurope  -NameStorageAcctForNestedTemplates qnaqastornestedtempl -ResourceGroupPrefix qna-qa -ArtifactPrefix qnaqa -AADClientId '$AAD_CLIENT_ID' -AADB2CIssuer '$AAD_B2C_ISSUER' ;
+          ./deploy-infra -NameRGForNestedTemplates 'qna-qa-infra' -LocationRGForNestedTemplates westeurope  -NameStorageAcctForNestedTemplates qnaqastornestedtempl -ResourceGroupPrefix qna-qa -ArtifactPrefix qnaqa -AADClientId '${{ env.AAD_CLIENT_ID }}' -AADB2CIssuer '${{ env.AAD_B2C_ISSUER }}' ;
           
           
