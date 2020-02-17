@@ -74,5 +74,26 @@ jobs:
         run: |
           cd deployment ;
           ./deploy-infra -NameRGForNestedTemplates 'qna-qa-infra' -LocationRGForNestedTemplates westeurope  -NameStorageAcctForNestedTemplates qnaqastornestedtempl -ResourceGroupPrefix qna-qa -ArtifactPrefix qnaqa -AADClientId '${{ env.AAD_CLIENT_ID }}' -AADB2CIssuer '${{ env.AAD_B2C_ISSUER }}' ;
-          
-          
+  deploy-static-website:
+    needs: [deploy-arm-templates]
+    runs-on: ubuntu-latest
+    container:
+      image: azuresdk/azure-powershell-core # => run step in container, as documented here: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idcontainer
+    name: Deploy-Static-Website
+    steps:
+      - name: PWSH-Login-To-Azure
+        shell: pwsh
+        run: |
+          # Install Powershell Az Module:
+          Install-Module -Name Az -AllowClobber -Scope CurrentUser -SkipPublisherCheck -AcceptLicense -Force ;
+          # Login to Azure:
+          Add-Type -Path "/usr/local/share/powershell/Modules/Az.Profile/PreloadAssemblies/Microsoft.IdentityModel.Clients.ActiveDirectory.dll" ;
+          Import-Module Az.Profile -Force ;
+          $Password = ConvertTo-SecureString ${{ secrets.SP_PROD_DEPL_PWD }} -AsPlainText -Force ;
+          $Creds = New-Object System.Management.Automation.PSCredential( '${{ secrets.SP_PROD_DEPL_APPID }}', $Password) ;
+          Connect-AzAccount -ServicePrincipal -SubscriptionId '${{ env.SUBSCRIPTION_ID }}' -TenantId '${{ env.TENANT_ID }}' -Credential $Creds ;
+      - name: Download artifact for static SPA website
+        uses: actions/upload-artifact@v1
+        with:
+          name: spa
+          path: spa.zip          
