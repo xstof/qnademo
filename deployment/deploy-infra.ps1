@@ -76,7 +76,7 @@ ForEach ($deploy in $regionDeploys){
 
   # Set Function App Settings:
   Set-AzWebApp -ResourceGroupName $deploy.resourceGroup -Name $functionName -AppSettings $hashTableWithSettings
-  Write-Output "changed function $functionName web app settings for SignalR to: $key"
+  Write-Output "changed function $functionName web app settings for SignalR to: $($key.PrimaryConnectionString)"
 
 }
 

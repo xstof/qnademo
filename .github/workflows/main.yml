@@ -48,16 +48,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: azuresdk/azure-powershell-core # => run step in container, as documented here: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idcontainer
-      volumes: 
-        - .:/mycode
-        #- /home/runner/work/qnademo/qnademo:/mycode
     name: Deploy-Arm-Templates
     steps:
-      # - name: CLI-Login-To-Azure
-      #  uses: Azure/login@v1
-      #  with:
-      #    # Paste output of `az ad sp create-for-rbac` as value of secret variable: AZURE_CREDENTIALS
-      #    creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: PWSH-Login-To-Azure
         shell: pwsh
         run: |
@@ -69,25 +61,11 @@ jobs:
           $Password = ConvertTo-SecureString ${{ secrets.SP_PROD_DEPL_PWD }} -AsPlainText -Force ;
           $Creds = New-Object System.Management.Automation.PSCredential( '${{ secrets.SP_PROD_DEPL_APPID }}', $Password) ;
           Connect-AzAccount -ServicePrincipal -SubscriptionId '33761810-ec30-441e-ad3e-50f029e977f7' -TenantId '72f988bf-86f1-41af-91ab-2d7cd011db47' -Credential $Creds ;
-          # Change active subscription:
-          # $context = Get-AzSubscription -SubscriptionId '33761810-ec30-441e-ad3e-50f029e977f7'
-          # Set-AzContext $context
       - name: Checkout
         uses: actions/checkout@v2
       - name: Deploy-ARM-Template
         shell: pwsh
         run: |
-          # echo $(ls) ;
-          # echo $(ls /__w) ;
-          # cd /__w/qnademo ;
-          # echo 'switched to __w/qndemo' ;
-          # echo $(ls) ;
-          # cd /__w/qnademo/qnademo ;
-          # echo 'switched to /__w/qndemo/qnademo' ;
-          # echo $(ls) ;
-          # cd /mycode ;
-          # echo 'switched to /mycode' ;
-          # echo $(ls) ;
           cd deployment ;
           ./deploy-infra -NameRGForNestedTemplates 'qna-qa-infra' -LocationRGForNestedTemplates westeurope  -NameStorageAcctForNestedTemplates qnaqastornestedtempl -ResourceGroupPrefix qna-qa -ArtifactPrefix qnaqa -AADClientId 'd03fc97e-cc4e-4758-944a-43fe4cf3eecc' -AADB2CIssuer 'https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_susi' ;
           
