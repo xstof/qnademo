@@ -96,4 +96,11 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: spa
-          path: spa.zip          
+          path: spa #target path
+      - name: Unpack artifact
+        shell: pwsh
+        run: |
+          ls;
+          Write-Host "Move into spa directory"
+          cd spa;
+          ls;
