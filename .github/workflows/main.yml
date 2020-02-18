@@ -111,6 +111,36 @@ jobs:
           cd deployment ;
           ./deploy-static-assets-global.ps1 -DeploymentName '${{ env.DEPLOYMENT_NAME }}' -DistPath '../spa' ;
           # ./deploy-function-package-global.ps1 -DeploymentName '${{ env.DEPLOYMENT_NAME }}' -PackagePath '../spa';
+
+  deploy-functions-backend:
+    needs: [deploy-arm-templates]
+    runs-on: ubuntu-latest
+    container:
+      image: azuresdk/azure-powershell-core # => run step in container, as documented here: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idcontainer
+    name: Deploy-Functions-Backend
+    steps:
+      - name: PWSH-Login-To-Azure
+        shell: pwsh
+        run: |
+          # Install Powershell Az Module:
+          Install-Module -Name Az -AllowClobber -Scope CurrentUser -SkipPublisherCheck -AcceptLicense -Force ;
+          # Login to Azure:
+          Add-Type -Path "/usr/local/share/powershell/Modules/Az.Profile/PreloadAssemblies/Microsoft.IdentityModel.Clients.ActiveDirectory.dll" ;
+          Import-Module Az.Profile -Force ;
+          $Password = ConvertTo-SecureString ${{ secrets.SP_PROD_DEPL_PWD }} -AsPlainText -Force ;
+          $Creds = New-Object System.Management.Automation.PSCredential( '${{ secrets.SP_PROD_DEPL_APPID }}', $Password) ;
+          Connect-AzAccount -ServicePrincipal -SubscriptionId '${{ env.SUBSCRIPTION_ID }}' -TenantId '${{ env.TENANT_ID }}' -Credential $Creds ;
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download artifact for Azure Functions backend
+        uses: actions/download-artifact@v1
+        with:
+          name: functions  # => will be downloaded into folder "spa"
+      - name: Deploy SPA app to all storage accounts
+        shell: pwsh
+        run: |
+          cd deployment ;
+          ./deploy-function-package-global.ps1 -DeploymentName '${{ env.DEPLOYMENT_NAME }}' -PackagePath '../functions';
           
           
           
