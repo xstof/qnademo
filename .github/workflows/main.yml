@@ -93,15 +93,16 @@ jobs:
           $Creds = New-Object System.Management.Automation.PSCredential( '${{ secrets.SP_PROD_DEPL_APPID }}', $Password) ;
           Connect-AzAccount -ServicePrincipal -SubscriptionId '${{ env.SUBSCRIPTION_ID }}' -TenantId '${{ env.TENANT_ID }}' -Credential $Creds ;
       - name: Download artifact for static SPA website
-        uses: actions/upload-artifact@v1
+        uses: actions/download-artifact@v1
         with:
-          name: spa
-          path: spa #target path
+          name: spa  # => will be downloaded into folder "spa"
       - name: Unpack artifact
         shell: pwsh
         run: |
+          Write-Host "contents of current dir"
           ls;
-          Write-Host "Move into spa directory"
-          mkdir spa;
           cd spa;
+          Write-Host "contents of spa artifact directory:"
           ls;
+          
+          
