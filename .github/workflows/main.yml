@@ -5,6 +5,7 @@ env:
   TENANT_ID: 72f988bf-86f1-41af-91ab-2d7cd011db47
   AAD_CLIENT_ID: d03fc97e-cc4e-4758-944a-43fe4cf3eecc
   AAD_B2C_ISSUER: https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_susi
+  DEPLOYMENT_NAME: qna-root-deployment
 
 on: 
   push:
@@ -92,11 +93,13 @@ jobs:
           $Password = ConvertTo-SecureString ${{ secrets.SP_PROD_DEPL_PWD }} -AsPlainText -Force ;
           $Creds = New-Object System.Management.Automation.PSCredential( '${{ secrets.SP_PROD_DEPL_APPID }}', $Password) ;
           Connect-AzAccount -ServicePrincipal -SubscriptionId '${{ env.SUBSCRIPTION_ID }}' -TenantId '${{ env.TENANT_ID }}' -Credential $Creds ;
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Download artifact for static SPA website
         uses: actions/download-artifact@v1
         with:
           name: spa  # => will be downloaded into folder "spa"
-      - name: Unpack artifact
+      - name: Deploy SPA app to all storage accounts
         shell: pwsh
         run: |
           Write-Host "contents of current dir"
@@ -104,5 +107,10 @@ jobs:
           cd spa;
           Write-Host "contents of spa artifact directory:"
           ls;
+          cd .. ;
+          cd deployment ;
+          ./deploy-static-assets-global.ps1 -DeploymentName '${{ env.DEPLOYMENT_NAME }}' -DistPath '../spa' ;
+          # ./deploy-function-package-global.ps1 -DeploymentName '${{ env.DEPLOYMENT_NAME }}' -PackagePath '../spa';
+          
           
           
