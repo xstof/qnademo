@@ -136,11 +136,11 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: functions  # => will be downloaded into folder "spa"
-      - name: Deploy SPA app to all storage accounts
+      - name: Deploy Functions backend to all geos
         shell: pwsh
         run: |
           cd deployment ;
-          ./deploy-function-package-global.ps1 -DeploymentName '${{ env.DEPLOYMENT_NAME }}' -PackagePath '../functions';
+          ./deploy-function-package-global.ps1 -DeploymentName '${{ env.DEPLOYMENT_NAME }}' -PackagePath '../functions/qna-fn-backend.zip';
           
           
           
