@@ -102,5 +102,6 @@ jobs:
         run: |
           ls;
           Write-Host "Move into spa directory"
+          mkdir spa;
           cd spa;
           ls;
