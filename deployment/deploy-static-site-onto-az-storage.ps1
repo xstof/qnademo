@@ -736,6 +736,11 @@ Get-ChildItem -File -Recurse $PathForFilesToUpload | ForEach-Object {
                         "", `
                         [System.Text.RegularExpressions.RegexOptions]::IgnoreCase);
   Write-Output "BlobName is: $BlobName"
+  if ($BlobName.StartsWith("\") ) {
+    $BlobName = $BlobName.TrimStart("\")
+    Write-Output "New trimmed BlobName is: $BlobName"
+  }
+
   $ContentType = $ContentTypeTable.Item($_.Extension)
   if([String]::IsNullOrWhiteSpace($ContentType)){
     Set-AzStorageBlobContent -File $_.FullName -Blob $BlobName -Container `$web -Context $StorageContext -Force
