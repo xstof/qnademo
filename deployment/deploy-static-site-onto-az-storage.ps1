@@ -711,7 +711,15 @@ Enable-AzStorageStaticWebsite -Context $StorageContext -IndexDocument "index.htm
 
 # Upload files into storage account:
 Get-ChildItem -File -Recurse $PathForFilesToUpload | ForEach-Object { 
-  $FullName = $_.FullName.Replace("/", "\")
+  # determine how dir names are delimited:
+  $fwdSlashCountInPath = ($PathForFilesToUpload.ToCharArray() | Where-Object {$_ -eq '/'} | Measure-Object).Count
+  if($fwdSlashCountInPath -lt 2) {
+    # PathForFilesToUpload is delimited by \ (instead of /)
+    Write-Output "Replacing dir separator in FileName.  Before: $FullName"
+    $FullName = $_.FullName.Replace("/", "\")
+    Write-Output "After: $FullName"
+  }
+  
   Write-Output "Full filename for file to upload is: $FullName"
   Write-Output "Path to upload is: $PathForFilesToUpload"
   $BlobName = [Regex]::Replace(`

@@ -23,8 +23,9 @@ import { getToken } from '../auth'
 // We create our own axios instance and set a custom base URL.
 // Note that if we wouldn't set any config here we do not need
 // a named export, as we could just `import axios from 'axios'`
+// TODO - make this URL dynamic
 const axiosInstance = axios.create({
-  baseURL: 'https://qna-frontdoor.azurefd.net/'
+  baseURL: 'https://qnaqa-frontdoor.azurefd.net/'
 })
 
 axiosInstance.interceptors.request.use(
