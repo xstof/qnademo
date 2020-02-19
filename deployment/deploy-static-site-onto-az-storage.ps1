@@ -13,7 +13,7 @@ Param(
 Write-Output "path for files to upload is: $PathForFilesToUpload"
 $ResolvedPath = [System.IO.Path]::GetFullPath($PathForFilesToUpload)
 Write-Output "resolved path is $ResolvedPath"
-$PathForFilesToUpload = $ResolvedPath
+$PathForFilesToUpload = $ResolvedPath 
 
 # Initialize content type table:
 $ContentTypeTable = @{ `
