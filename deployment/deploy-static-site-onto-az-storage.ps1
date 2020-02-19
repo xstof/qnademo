@@ -8,7 +8,7 @@ Param(
 
   [Parameter(Mandatory=$True)]
   [string]$PathForFilesToUpload
-)
+) 
 
 Write-Output "path for files to upload is: $PathForFilesToUpload"
 $ResolvedPath = [System.IO.Path]::GetFullPath($PathForFilesToUpload)
