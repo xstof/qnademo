@@ -721,7 +721,7 @@ Get-ChildItem -File -Recurse $PathForFilesToUpload | ForEach-Object {
   $fwdSlashCountInPath = ($PathForFilesToUpload.ToCharArray() | Where-Object {$_ -eq '/'} | Measure-Object).Count
   # TODO: reverse slashes to fix GH Actions upload
   $FullName = $_.FullName
-  if($fwdSlashCountInPath -gt 0) {
+  if($fwdSlashCountInPath -eq 0) {
     # PathForFilesToUpload is delimited by \ (instead of /)
     Write-Output "Replacing dir separator in FileName.  Before: $FullName"
     $FullName = $_.FullName.Replace("/", "\")
