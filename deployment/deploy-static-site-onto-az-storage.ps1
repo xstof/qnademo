@@ -710,10 +710,17 @@ $StorageContext = New-AzStorageContext -StorageAccountKey $Key[0].Value -Storage
 Enable-AzStorageStaticWebsite -Context $StorageContext -IndexDocument "index.html" -ErrorDocument404Path "index.html" 
 
 # Upload files into storage account:
+$fwdSlashCountInPath = ($PathForFilesToUpload.ToCharArray() | Where-Object {$_ -eq '/'} | Measure-Object).Count
+if($fwdSlashCountInPath -gt 0) {
+  Write-Output "Replacing dir separator in PathForFilesToUpload.  Before: $PathForFilesToUpload"
+  $PathForFilesToUpload = $PathForFilesToUpload.Replace("/", "\")
+  Write-Output "After: $PathForFilesToUpload"
+}
 Get-ChildItem -File -Recurse $PathForFilesToUpload | ForEach-Object { 
   # determine how dir names are delimited:
   $fwdSlashCountInPath = ($PathForFilesToUpload.ToCharArray() | Where-Object {$_ -eq '/'} | Measure-Object).Count
-  if($fwdSlashCountInPath -lt 2) {
+  # TODO: reverse slashes to fix GH Actions upload
+  if($fwdSlashCountInPath -gt 0) {
     # PathForFilesToUpload is delimited by \ (instead of /)
     Write-Output "Replacing dir separator in FileName.  Before: $FullName"
     $FullName = $_.FullName.Replace("/", "\")

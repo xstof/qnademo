@@ -8,7 +8,7 @@
         <!-- <q-btn stretch flat label="Login" @click="login" /> -->
         <q-btn-dropdown split color="primary" :label="labelForLoginButton" @click="login">
           <q-list>
-            <q-item v-if="isSignedIn" clickable v-close-popup @click="editprofile" disable="true" >
+            <q-item v-if="isSignedIn" clickable v-close-popup @click="editprofile" >
               <q-item-section>
                 <q-item-label>Change Profile</q-item-label>
               </q-item-section>
