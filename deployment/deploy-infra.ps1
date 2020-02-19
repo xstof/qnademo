@@ -94,8 +94,8 @@ Foreach ($deploy in $regionDeploys){
 $functionAppBackendAddresses = @()
 Foreach($deploy in $regionDeploys){
   # use the below to configure frontdoor to bypass APIM and go direct to the azurewebsites url
-  # $functionAppBackendAddresses += "$($deploy.functionAppName).azurewebsites.net"
-  $functionAppBackendAddresses += $deploy.apimUrl
+  $functionAppBackendAddresses += "$($deploy.functionAppName).azurewebsites.net"
+  # $functionAppBackendAddresses += $deploy.apimUrl
 }
 
 # create RG for deployment artifacts

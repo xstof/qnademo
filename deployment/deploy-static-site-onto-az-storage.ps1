@@ -712,8 +712,8 @@ Enable-AzStorageStaticWebsite -Context $StorageContext -IndexDocument "index.htm
 # Upload files into storage account:
 Get-ChildItem -File -Recurse $PathForFilesToUpload | ForEach-Object { 
   $FullName = $_.FullName.Replace("/", "\")
-  # Write-Output "Full filename for file to upload is: $FullName"
-  # Write-Output "Path to upload is: $PathForFilesToUpload"
+  Write-Output "Full filename for file to upload is: $FullName"
+  Write-Output "Path to upload is: $PathForFilesToUpload"
   $BlobName = [Regex]::Replace(`
                         $FullName, `
                         [regex]::Escape($PathForFilesToUpload), `
