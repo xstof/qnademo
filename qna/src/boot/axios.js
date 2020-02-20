@@ -24,6 +24,8 @@ import { getToken } from '../auth'
 // Note that if we wouldn't set any config here we do not need
 // a named export, as we could just `import axios from 'axios'`
 // TODO - make this URL dynamic
+
+console.log(`axiosInstance being created - ${window.location.protocol}//${window.location.hostname}//`)
 const axiosInstance = axios.create({
   baseURL: 'https://qnaqa-frontdoor.azurefd.net/'
 })

@@ -717,9 +717,8 @@ if($fwdSlashCountInPath -gt 0) {
   Write-Output "After: $PathForFilesToUpload"
 }
 Get-ChildItem -File -Recurse $PathForFilesToUpload | ForEach-Object { 
-  # determine how dir names are delimited:
+  # determine how dir names are delimited (which is differerent for linux / windows hosts):
   $fwdSlashCountInPath = ($PathForFilesToUpload.ToCharArray() | Where-Object {$_ -eq '/'} | Measure-Object).Count
-  # TODO: reverse slashes to fix GH Actions upload
   $FullName = $_.FullName
   if($fwdSlashCountInPath -eq 0) {
     # PathForFilesToUpload is delimited by \ (instead of /)
