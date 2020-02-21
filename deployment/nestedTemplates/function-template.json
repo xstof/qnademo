@@ -213,6 +213,7 @@
             "allowedOrigins": [
               "http://localhost:8080",
               "https://localhost:8080",
+              "[concat('https://', variables('functionAppName'), '.azurewebsites.net')]",
               "[parameters('urlToWhitelistForCORS')]"
             ],
             "supportCredentials": true
