@@ -17,8 +17,34 @@ on:
   push:
     branches: 
       - dev
+      - master
 
 jobs:
+  set-environment:
+    # see: https://github.community/t5/GitHub-Actions/Set-environment-variable-based-on-git-branch/m-p/40271/highlight/true#M4160
+    runs-on: ubuntu-latest
+    name: 'Set environment variables'
+    steps:
+      - name: Set env to staging
+        if: endsWith(github.ref, '/dev')
+        run: |
+          # echo "::set-env name=ENVIRONMENT::staging"
+          echo "::set-env name=DEPLOYMENT_NAME::qnaqa-root-deployment"
+          echo "::set-env name=FRONTEND_URL::https://qnaqa-frontdoor.azurefd.net/"
+          echo "::set-env name=NAME_RG_FOR_NESTED_TEMPLATES::qna-qa-infra"
+          echo "::set-env name=NAME_STOR_ACCT_FOR_NESTED_TEMPLATES::qnaqastornestedtempl"
+          echo "::set-env name=RG_PREFIX::qna-qa"
+          echo "::set-env name=RESOURCE_PREFIX::qnaqa"
+      - name: Set env to production
+        if: endsWith(github.ref, '/master')
+        run: |
+          # echo "::set-env name=ENVIRONMENT::production"
+          echo "::set-env name=DEPLOYMENT_NAME::qna-root-deployment"
+          echo "::set-env name=FRONTEND_URL::https://qna-frontdoor.azurefd.net/"
+          echo "::set-env name=NAME_RG_FOR_NESTED_TEMPLATES::qna-infra"
+          echo "::set-env name=NAME_STOR_ACCT_FOR_NESTED_TEMPLATES::qnastornestedtempl"
+          echo "::set-env name=RG_PREFIX::qna"
+          echo "::set-env name=RESOURCE_PREFIX::qna"
   build-frontend:
     runs-on: ubuntu-latest
     name: 'Build-Quasar-Frontend'
