@@ -7,6 +7,11 @@ env:
   AAD_B2C_ISSUER: https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_susi
   DEPLOYMENT_NAME: qna-root-deployment
   FRONTEND_URL: https://qnaqa-frontdoor.azurefd.net/
+  NAME_RG_FOR_NESTED_TEMPLATES: qna-qa-infra
+  LOCATION_RG_FOR_NESTED_TEMPLATES: westeurope
+  NAME_STOR_ACCT_FOR_NESTED_TEMPLATES: qnaqastornestedtempl
+  RG_PREFIX: qna-qa
+  RESOURCE_PREFIX: qnaqa
 
 on: 
   push:
@@ -77,7 +82,7 @@ jobs:
         shell: pwsh
         run: |
           cd deployment ;
-          ./deploy-infra -NameRGForNestedTemplates 'qna-qa-infra' -LocationRGForNestedTemplates westeurope  -NameStorageAcctForNestedTemplates qnaqastornestedtempl -ResourceGroupPrefix qna-qa -ArtifactPrefix qnaqa -AADClientId '${{ env.AAD_CLIENT_ID }}' -AADB2CIssuer '${{ env.AAD_B2C_ISSUER }}' ;
+          ./deploy-infra -NameRGForNestedTemplates '${{ env.NAME_RG_FOR_NESTED_TEMPLATES }}' -LocationRGForNestedTemplates ${{ env.LOCATION_RG_FOR_NESTED_TEMPLATES }}  -NameStorageAcctForNestedTemplates ${{ env.NAME_STOR_ACCT_FOR_NESTED_TEMPLATES }} -ResourceGroupPrefix ${{ env.RG_PREFIX }} -ArtifactPrefix ${{ env.RESOURCE_PREFIX }} -AADClientId '${{ env.AAD_CLIENT_ID }}' -AADB2CIssuer '${{ env.AAD_B2C_ISSUER }}' ;
   deploy-static-website:
     needs: [deploy-arm-templates]
     runs-on: ubuntu-latest
@@ -113,7 +118,6 @@ jobs:
           cd .. ;
           cd deployment ;
           ./deploy-static-assets-global.ps1 -DeploymentName '${{ env.DEPLOYMENT_NAME }}' -DistPath '../spa' ;
-          # ./deploy-function-package-global.ps1 -DeploymentName '${{ env.DEPLOYMENT_NAME }}' -PackagePath '../spa';
 
   deploy-functions-backend:
     needs: [deploy-arm-templates]
