@@ -25,11 +25,12 @@ import { getToken } from '../auth'
 // a named export, as we could just `import axios from 'axios'`
 // TODO - make this URL dynamic
 
-console.log(`axiosInstance being created - ${window.location.protocol}//${window.location.hostname}//`)
+// console.log(`axiosInstance being created - ${window.location.protocol}//${window.location.hostname}//`)
+console.log(`axiosInstance being created: ${process.env.FRONTEND_URL}`)
 const axiosInstance = axios.create({
   // do not hardcode frontend url, use quasar variables instead
   // see: https://quasar.dev/quasar-cli/cli-documentation/handling-process-env#Example
-  baseURL: process.env.MODE
+  baseURL: process.env.FRONTEND_URL
   // baseURL: 'https://qnaqa-frontdoor.azurefd.net/'
 })
 
