@@ -75,6 +75,16 @@ module.exports = function (ctx) {
             formatter: require('eslint').CLIEngine.getFormatter('stylish')
           }
         })
+      },
+
+      // configuring environment variables
+      env: {
+        // FRONTEND_URL is set to base url of Azure Frontdoor or potentially 'localhost' for local hosting
+        // it may differ depending on the environment this is being build for
+        // specify this option by setting an environment variable before running "quasar build"
+        // like in linux: EXPORT FRONTEND_URL=http://https://qnaqa-frontdoor.azurefd.net/
+        // like in powershell: $Env:FRONTEND_URL = "http://https://qnaqa-frontdoor.azurefd.net/"
+        FRONTEND_URL: JSON.stringify(process.env.FRONTEND_URL) // make sure it ends with forward slash
       }
     },
 

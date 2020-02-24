@@ -6,6 +6,7 @@ env:
   AAD_CLIENT_ID: d03fc97e-cc4e-4758-944a-43fe4cf3eecc
   AAD_B2C_ISSUER: https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_susi
   DEPLOYMENT_NAME: qna-root-deployment
+  FRONTEND_URL: https://qnaqa-frontdoor.azurefd.net/
 
 on: 
   push:
@@ -29,6 +30,8 @@ jobs:
           sourcelocation: /github/workspace/qna
       - name: Upload SPA files as artifact
         uses: actions/upload-artifact@v1.0.0
+        env:
+          FRONTEND_URL: ${{ env.FRONTEND_URL }}
         with:
           # Artifact name
           name: spa

@@ -27,7 +27,10 @@ import { getToken } from '../auth'
 
 console.log(`axiosInstance being created - ${window.location.protocol}//${window.location.hostname}//`)
 const axiosInstance = axios.create({
-  baseURL: 'https://qnaqa-frontdoor.azurefd.net/'
+  // do not hardcode frontend url, use quasar variables instead
+  // see: https://quasar.dev/quasar-cli/cli-documentation/handling-process-env#Example
+  baseURL: process.env.MODE
+  // baseURL: 'https://qnaqa-frontdoor.azurefd.net/'
 })
 
 axiosInstance.interceptors.request.use(
