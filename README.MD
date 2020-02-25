@@ -1,4 +1,4 @@
-![CI](https://github.com/xstof/qnademo/workflows/CI/badge.svg?branch=dev)
+![CI on dev](https://github.com/xstof/qnademo/workflows/CI/badge.svg?branch=dev) ![CI on master](https://github.com/xstof/qnademo/workflows/CI/badge.svg?branch=master)
 
 # QnA Demo Application
 
