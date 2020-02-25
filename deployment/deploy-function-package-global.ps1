@@ -7,7 +7,7 @@ Param(
   [string]$PackagePath = ".\functionpackage\qna-fn-backend.zip"
 )
 
-$regionDeploys = $(Get-AzDeployment -Name "qna-root-deployment").Outputs.regionDeployments.Value | ConvertFrom-Json
+$regionDeploys = $(Get-AzDeployment -Name $DeploymentName).Outputs.regionDeployments.Value | ConvertFrom-Json
 
 $scriptPath = split-path -parent $MyInvocation.MyCommand.Definition
 $pathForPackage = Join-Path -Path $scriptPath -ChildPath $PackagePath
