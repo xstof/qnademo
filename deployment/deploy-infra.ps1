@@ -1,6 +1,9 @@
 [CmdletBinding()]
 Param(
   [Parameter(Mandatory=$False)]
+  [string]$RootDeploymentName="qna-root-deployment",
+
+  [Parameter(Mandatory=$False)]
   [string]$NameRGForNestedTemplates="qna-deployment",
 
   [Parameter(Mandatory=$False)]
@@ -50,10 +53,10 @@ Write-Output "Sas-token for accessing nested templates: $SasTokenForNestedTempla
 $NestedTemplatesLocation = "https://$NameStorageAcctForNestedTemplates.blob.core.windows.net"
 
 # deploy template for storage accounts, functions in each geo
-$InfraDeployment = New-AzDeployment -Location $LocationForSubscriptionLevelDeployment -Name "qna-root-deployment" -TemplateFile "azuredeploy.json" -TemplateParameterFile "azuredeploy.parameters.json" -artifactsLocation $NestedTemplatesLocation -artifactsLocationSasToken $SasTokenForNestedTemplates -resourceGroupPrefix $ResourceGroupPrefix -artifactPrefix $ArtifactPrefix -aadClientId $AADClientId -aadB2cIssuer $AADB2CIssuer
+$InfraDeployment = New-AzDeployment -Location $LocationForSubscriptionLevelDeployment -Name $RootDeploymentName -TemplateFile "azuredeploy.json" -TemplateParameterFile "azuredeploy.parameters.json" -artifactsLocation $NestedTemplatesLocation -artifactsLocationSasToken $SasTokenForNestedTemplates -resourceGroupPrefix $ResourceGroupPrefix -artifactPrefix $ArtifactPrefix -aadClientId $AADClientId -aadB2cIssuer $AADB2CIssuer
 
 # fetch what has been deployed
-$regionDeploys = $(Get-AzDeployment -Name "qna-root-deployment").Outputs.regionDeployments.Value | ConvertFrom-Json
+$regionDeploys = $(Get-AzDeployment -Name $RootDeploymentName).Outputs.regionDeployments.Value | ConvertFrom-Json
 
 # update function settings for signalr
 Write-Output "Update functions with connection string settings for SignalR"
