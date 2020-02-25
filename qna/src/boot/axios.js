@@ -23,8 +23,15 @@ import { getToken } from '../auth'
 // We create our own axios instance and set a custom base URL.
 // Note that if we wouldn't set any config here we do not need
 // a named export, as we could just `import axios from 'axios'`
+// TODO - make this URL dynamic
+
+// console.log(`axiosInstance being created - ${window.location.protocol}//${window.location.hostname}//`)
+console.log(`axiosInstance being created: ${process.env.FRONTEND_URL}`)
 const axiosInstance = axios.create({
-  baseURL: 'https://qna-frontdoor.azurefd.net/'
+  // do not hardcode frontend url, use quasar variables instead
+  // see: https://quasar.dev/quasar-cli/cli-documentation/handling-process-env#Example
+  baseURL: process.env.FRONTEND_URL
+  // baseURL: 'https://qnaqa-frontdoor.azurefd.net/'
 })
 
 axiosInstance.interceptors.request.use(

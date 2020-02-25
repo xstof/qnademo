@@ -121,7 +121,7 @@
                 }
             },
             "dependsOn": [
-                "[concat('deploy-region-', parameters('region'), '-apim-backends')]"
+                
             ]
         },
         {
@@ -151,7 +151,8 @@
                         "value": "[parameters('cosmosconnectionstring')]"
                     },
                     "signalrconnectionstring": {
-                        "value": "[listKeys(resourceId('Microsoft.SignalRService/SignalR', variables('signalrName')), providers('Microsoft.SignalRService','SignalR').apiVersions[0]).primaryConnectionString]"
+                        // "value": "[listKeys(resourceId('Microsoft.SignalRService/SignalR', variables('signalrName')), providers('Microsoft.SignalRService','SignalR').apiVersions[0]).primaryConnectionString]"
+                        "value": "xxxx"
                     },
                     "urlToWhitelistForCORS": {
                         "value": "[concat('https://', parameters('frontDoorName'), '.azurefd.net')]"
@@ -166,6 +167,7 @@
             },
             "dependsOn": [
                 "[concat('deploy-region-', parameters('region'), '-signalr')]"
+                // "[concat('deploy-region-', parameters('region'), '-apim')]" // not strictly needed, but in this way it takes longer and the signalrconnectionstring will be ready by then (race condition)
             ]
         },
         {
@@ -189,13 +191,16 @@
                         "value": "[variables('apimName')]"
                     },             
                     "publisherEmail": {
-                        "value": "[variables('apimPublisherEmail')]"
+                        "value": "[variables('apimPublisherEmail')]" 
                     },
                     "publisherName": {
                         "value": "[variables('apimPublisherName')]"
                     }
                 }
-            }
+            },
+            "dependsOn":[
+                "[concat('deploy-region-', parameters('region'), '-functionapp')]"
+            ]
         },
         {
             "name": "[concat('deploy-region-', parameters('region'), '-apim-backends')]",
@@ -218,15 +223,19 @@
                         "value": "[concat('https://management.azure.com', resourceId('Microsoft.Web/sites', variables('functionAppName')))]"
                     },
                     "FunctionsKey": {
-                        "value": "[listkeys(concat(resourceId('Microsoft.Web/sites', variables('functionAppName')), '/host/default'), '2018-11-01').masterKey]"
+                        // listkeys can fail the ARM template as not guaranteed available as soon as template for function completed
+                        // not really needed in this scenario anyway - all functions are either open or protected over oauth2
+                        // "value": "[listkeys(resourceId('Microsoft.Web/sites/host/', variables('functionAppName'), 'default'), '2018-11-01').masterKey]"
+                        "value": "xxxx"
                     },
                     "FunctionResourceUrl": {
-                        "value": "[concat('https://', variables('functionAppName'), '.azurewebsites.net/api')]"
+                        "value": "[concat('https://', variables('functionAppName'), '.azurewebsites.net/api')]" 
                     }
                 }
             },
             "dependsOn": [
-                "[concat('deploy-region-', parameters('region'), '-apim')]"
+                "[concat('deploy-region-', parameters('region'), '-apim')]",
+                "[concat('deploy-region-', parameters('region'), '-functionapp')]"
             ]
         },
         {
@@ -263,7 +272,7 @@
         },
         "state": {
             "type": "array",
-            "value": "[concat(array(json(concat('{\"resourceGroup\":\"',variables('resourceGroup'),'\",\"storageAccount\":\"', variables('storageAccountName'),'\",\"functionAppName\":\"', variables('functionAppName'), '\",\"apimUrl\":\"', variables('apimName'), '.azure-api.net\"' ,'}'))), parameters('state'))]"
+            "value": "[concat(array(json(concat('{\"resourceGroup\":\"',variables('resourceGroup'),'\",\"storageAccount\":\"', variables('storageAccountName'),'\",\"functionAppName\":\"', variables('functionAppName'), '\",\"apimUrl\":\"', variables('apimName'), '.azure-api.net\",\"signalrName\":\"', variables('signalrName'), '\"' ,'}'))), parameters('state'))]"
         }
     }
 }

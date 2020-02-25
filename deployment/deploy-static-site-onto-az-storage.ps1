@@ -8,12 +8,12 @@ Param(
 
   [Parameter(Mandatory=$True)]
   [string]$PathForFilesToUpload
-)
+) 
 
 Write-Output "path for files to upload is: $PathForFilesToUpload"
 $ResolvedPath = [System.IO.Path]::GetFullPath($PathForFilesToUpload)
 Write-Output "resolved path is $ResolvedPath"
-$PathForFilesToUpload = $ResolvedPath
+$PathForFilesToUpload = $ResolvedPath 
 
 # Initialize content type table:
 $ContentTypeTable = @{ `
@@ -710,15 +710,36 @@ $StorageContext = New-AzStorageContext -StorageAccountKey $Key[0].Value -Storage
 Enable-AzStorageStaticWebsite -Context $StorageContext -IndexDocument "index.html" -ErrorDocument404Path "index.html" 
 
 # Upload files into storage account:
+$fwdSlashCountInPath = ($PathForFilesToUpload.ToCharArray() | Where-Object {$_ -eq '/'} | Measure-Object).Count
+if($fwdSlashCountInPath -gt 0) {
+  Write-Output "Replacing dir separator in PathForFilesToUpload.  Before: $PathForFilesToUpload"
+  $PathForFilesToUpload = $PathForFilesToUpload.Replace("/", "\")
+  Write-Output "After: $PathForFilesToUpload"
+}
 Get-ChildItem -File -Recurse $PathForFilesToUpload | ForEach-Object { 
-  $FullName = $_.FullName.Replace("/", "\")
-  # Write-Output "Full filename for file to upload is: $FullName"
-  # Write-Output "Path to upload is: $PathForFilesToUpload"
+  # determine how dir names are delimited (which is differerent for linux / windows hosts):
+  $fwdSlashCountInPath = ($PathForFilesToUpload.ToCharArray() | Where-Object {$_ -eq '/'} | Measure-Object).Count
+  $FullName = $_.FullName
+  if($fwdSlashCountInPath -eq 0) {
+    # PathForFilesToUpload is delimited by \ (instead of /)
+    Write-Output "Replacing dir separator in FileName.  Before: $FullName"
+    $FullName = $_.FullName.Replace("/", "\")
+    Write-Output "After: $FullName"
+  }
+  
+  Write-Output "Full filename for file to upload is: $FullName"
+  Write-Output "Path to upload is: $PathForFilesToUpload"
   $BlobName = [Regex]::Replace(`
                         $FullName, `
                         [regex]::Escape($PathForFilesToUpload), `
                         "", `
                         [System.Text.RegularExpressions.RegexOptions]::IgnoreCase);
+  Write-Output "BlobName is: $BlobName"
+  if ($BlobName.StartsWith("\") ) {
+    $BlobName = $BlobName.TrimStart("\")
+    Write-Output "New trimmed BlobName is: $BlobName"
+  }
+
   $ContentType = $ContentTypeTable.Item($_.Extension)
   if([String]::IsNullOrWhiteSpace($ContentType)){
     Set-AzStorageBlobContent -File $_.FullName -Blob $BlobName -Container `$web -Context $StorageContext -Force

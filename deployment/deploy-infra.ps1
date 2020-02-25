@@ -1,6 +1,9 @@
 [CmdletBinding()]
 Param(
   [Parameter(Mandatory=$False)]
+  [string]$RootDeploymentName="qna-root-deployment",
+
+  [Parameter(Mandatory=$False)]
   [string]$NameRGForNestedTemplates="qna-deployment",
 
   [Parameter(Mandatory=$False)]
@@ -37,7 +40,7 @@ Write-Output "Storage Account created"
 
 # upload nested templates
 Write-Output "Creating storage container for nested templates: '$NestedTemplatesStorageContainerName'"
-New-AzStorageContainer -Name $NestedTemplatesStorageContainerName -Context $StorageContext -WarningAction SilentlyContinue
+New-AzStorageContainer -Name $NestedTemplatesStorageContainerName -Context $StorageContext -ErrorAction SilentlyContinue
 Write-Output "Storage container created"
 Write-Output "Uploading nested templates"
 Get-ChildItem "./nestedTemplates" -File -Recurse | Set-AzStorageBlobContent -Context $StorageContext -Container $NestedTemplatesStorageContainerName -ErrorAction SilentlyContinue -Force
@@ -50,10 +53,35 @@ Write-Output "Sas-token for accessing nested templates: $SasTokenForNestedTempla
 $NestedTemplatesLocation = "https://$NameStorageAcctForNestedTemplates.blob.core.windows.net"
 
 # deploy template for storage accounts, functions in each geo
-$InfraDeployment = New-AzDeployment -Location $LocationForSubscriptionLevelDeployment -Name "qna-root-deployment" -TemplateFile "azuredeploy.json" -TemplateParameterFile "azuredeploy.parameters.json" -artifactsLocation $NestedTemplatesLocation -artifactsLocationSasToken $SasTokenForNestedTemplates -resourceGroupPrefix $ResourceGroupPrefix -artifactPrefix $ArtifactPrefix -aadClientId $AADClientId -aadB2cIssuer $AADB2CIssuer
+$InfraDeployment = New-AzDeployment -Location $LocationForSubscriptionLevelDeployment -Name $RootDeploymentName -TemplateFile "azuredeploy.json" -TemplateParameterFile "azuredeploy.parameters.json" -artifactsLocation $NestedTemplatesLocation -artifactsLocationSasToken $SasTokenForNestedTemplates -resourceGroupPrefix $ResourceGroupPrefix -artifactPrefix $ArtifactPrefix -aadClientId $AADClientId -aadB2cIssuer $AADB2CIssuer
 
-# deploy template for frontdoor
-$regionDeploys = $(Get-AzDeployment -Name "qna-root-deployment").Outputs.regionDeployments.Value | ConvertFrom-Json
+# fetch what has been deployed
+$regionDeploys = $(Get-AzDeployment -Name $RootDeploymentName).Outputs.regionDeployments.Value | ConvertFrom-Json
+
+# update function settings for signalr
+Write-Output "Update functions with connection string settings for SignalR"
+ForEach ($deploy in $regionDeploys){
+  $signalRName = $deploy.signalrName
+  $functionName = $deploy.functionAppName
+  $key = Get-AzSignalRKey -ResourceGroupName $deploy.resourceGroup -Name $signalRName
+
+  # Get Function App Settings:
+  $functionApp = Get-AzWebApp -ResourceGroupName $deploy.resourceGroup -Name $functionName
+  $functionAppSettings = $functionApp.SiteConfig.AppSettings
+  $hashTableWithSettings = @{}
+  ForEach ($item in $functionAppSettings){
+    if ($item.Name -eq "AzureSignalRConnectionString") {    
+      $hashTableWithSettings[$item.Name] = $key.PrimaryConnectionString
+    } else {
+      $hashTableWithSettings[$item.Name] = $item.Value
+    }
+  }
+
+  # Set Function App Settings:
+  Set-AzWebApp -ResourceGroupName $deploy.resourceGroup -Name $functionName -AppSettings $hashTableWithSettings
+  Write-Output "changed function $functionName web app settings for SignalR to: $($key.PrimaryConnectionString)"
+
+}
 
 # create list of backend addresses for static assets
 $staticAssetsBackendAddresses = @()
@@ -69,10 +97,14 @@ Foreach ($deploy in $regionDeploys){
 $functionAppBackendAddresses = @()
 Foreach($deploy in $regionDeploys){
   # use the below to configure frontdoor to bypass APIM and go direct to the azurewebsites url
-  # $functionAppBackendAddresses += "$($deploy.functionAppName).azurewebsites.net"
-  $functionAppBackendAddresses += $deploy.apimUrl
+  $functionAppBackendAddresses += "$($deploy.functionAppName).azurewebsites.net"
+  # $functionAppBackendAddresses += $deploy.apimUrl
 }
 
+# create RG for deployment artifacts
+New-AzResourceGroup -Name "$($ResourceGroupPrefix)-fd" -Location $LocationRGForNestedTemplates -Force -ErrorAction SilentlyContinue
+
+# deploy frontdoor
 New-AzResourceGroupDeployment -ResourceGroupName "$($ResourceGroupPrefix)-fd" -Name "qna-fd-deployment" -TemplateFile "frontdoor-template.json" -frontDoorName "$($ArtifactPrefix)-frontdoor" -staticAssetsBackendAddresses $staticAssetsBackendAddresses -functionAppBackendAddresses $functionAppBackendAddresses
 
 return $InfraDeployment

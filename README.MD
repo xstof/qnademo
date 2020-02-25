@@ -1,3 +1,5 @@
+![CI on dev](https://github.com/xstof/qnademo/workflows/CI/badge.svg?branch=dev) ![CI on master](https://github.com/xstof/qnademo/workflows/CI/badge.svg?branch=master)
+
 # QnA Demo Application
 
 This application demonstrates how a cloud-first modern design allows to combine large geo-distributed scale out of compute with high resilience while not giving in on cost or user experience.  This is made possible by the smart combination of:

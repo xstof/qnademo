@@ -27,7 +27,7 @@ let msalConfig = {
     logger: new Msal.Logger(
       loggerCallback, {
         level: Msal.LogLevel.Verbose,
-        piiLoggingEnabled: false,
+        piiLoggingEnabled: true,
         correlationId: '1234'
       }
     )
@@ -40,15 +40,26 @@ msalInstance.handleRedirectCallback(authRedirectCallBack)
 // TODO: CHANGE THIS TO REFLECT YOUR APP REGISTRATION AND AAD B2C TENANT:
 var loginRequest = {
   // scopes: ['openid', 'profile', 'email', authoringScope]
-  scopes: ['openid', 'profile', 'email', 'https://xstofb2c.onmicrosoft.com/qna/user_impersonation']
+  // scopes: ['openid', 'profile', 'email', 'https://xstofb2c.onmicrosoft.com/qna/user_impersonation']
+  // scopes: ['openid', 'profile', 'email', 'https://xstofb2c.onmicrosoft.com/qna/qna_author']
+  scopes: ['openid', 'profile', 'email', 'https://xstofb2c.onmicrosoft.com/qna/qna_author', 'https://xstofb2c.onmicrosoft.com/qna/user_impersonation']
 }
 
 // redirect call back
 function authRedirectCallBack (error, response) {
   console.log('authredirect callback executing')
+
   if (error) {
     console.log(error)
   } else {
+    var acct = window.localStorage.getItem('acct')
+    if (!acct) {
+      console.log('seeing account for first time - storing it to fetch access tokens with later on')
+      window.localStorage.setItem('acct', JSON.stringify(msalInstance.getAccount()))
+      var acctStored = JSON.parse(window.localStorage.getItem('acct'))
+      console.log(acctStored)
+    }
+
     if (response.tokenType === 'id_token') {
       console.log('id token received')
       // acquireTokenRedirectAndCallMSGraph(graphConfig.graphMeEndpoint, loginRequest)
@@ -70,11 +81,14 @@ function login () {
 }
 
 function logout () {
+  window.localStorage.removeItem('acct')
   msalInstance.logout()
 }
 
 var editProfileRequest = {
   scopes: ['openid', 'profile', 'email'],
+  // scopes: ['openid', 'profile', 'email', 'https://xstofb2c.onmicrosoft.com/qna/qna_author'],
+  // scopes: ['openid', 'profile', 'email', 'https://xstofb2c.onmicrosoft.com/qna/qna_author', 'https://xstofb2c.onmicrosoft.com/qna/user_impersonation'],
   extraQueryParameters: { p: 'B2C_1_ep' }
 }
 
@@ -82,21 +96,28 @@ function editProfile () {
   // msalInstance.redirectUri = `${baseRedirectUri}?returnto=${window.location.pathname}`
   console.log('about to redirect using msal for a profile edit flow')
   msalInstance.loginRedirect(editProfileRequest)
-  login()
+  // login()
 }
 
 // TODO: CHANGE THIS TO REFLECT YOUR APP REGISTRATION AND AAD B2C TENANT:
-const accessTokenRequest = {
+var accessTokenRequest = {
   // scopes: [authoringScope, 'https://xstofb2c.onmicrosoft.com/qna/user_impersonation'],  => does not work with easyauth ?
   // scopes: [authoringScope],                                                             => does not work with easyauth ?
   // scopes: ['openid', 'https://xstofb2c.onmicrosoft.com/qna/user_impersonation'],
-  scopes: ['https://xstofb2c.onmicrosoft.com/qna/user_impersonation'],
-  extraQueryParameters: { p: 'b2c_1_susi' }
+  // scopes: ['https://xstofb2c.onmicrosoft.com/qna/user_impersonation'],
+  // scopes: ['https://xstofb2c.onmicrosoft.com/qna/qna_author'],
+  scopes: ['https://xstofb2c.onmicrosoft.com/qna/qna_author', 'https://xstofb2c.onmicrosoft.com/qna/user_impersonation'],
+  extraQueryParameters: { p: 'b2c_1_susi' },
+  account: null
 }
 
 function getToken () {
   return new Promise(function (resolve, reject) {
     if (msalInstance.getAccount()) {
+      var acct = JSON.parse(window.localStorage.getItem('acct'))
+      accessTokenRequest.account = acct
+      console.log('access token request parameters:')
+      console.log(accessTokenRequest)
       msalInstance.acquireTokenSilent(accessTokenRequest)
         .then(function (accessTokenResponse) {
           if (!accessTokenResponse.accessToken) {

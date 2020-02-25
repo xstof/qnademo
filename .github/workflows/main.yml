@@ -1,0 +1,234 @@
+name: CI
+
+env:
+  SUBSCRIPTION_ID: 33761810-ec30-441e-ad3e-50f029e977f7
+  TENANT_ID: 72f988bf-86f1-41af-91ab-2d7cd011db47
+  QA_AAD_CLIENT_ID: d03fc97e-cc4e-4758-944a-43fe4cf3eecc
+  PROD_AAD_CLIENT_ID: d03fc97e-cc4e-4758-944a-43fe4cf3eecc
+  QA_AAD_B2C_ISSUER: https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_susi
+  PROD_AAD_B2C_ISSUER: https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_susi
+  QA_DEPLOYMENT_NAME: qnaqa-root-deployment
+  PROD_DEPLOYMENT_NAME: qna-root-deployment
+  QA_FRONTEND_URL: https://qnaqa-frontdoor.azurefd.net/
+  PROD_FRONTEND_URL: https://qna-frontdoor.azurefd.net/
+  QA_NAME_RG_FOR_NESTED_TEMPLATES: qna-qa-infra
+  PROD_NAME_RG_FOR_NESTED_TEMPLATES: qna-infra
+  QA_LOCATION_RG_FOR_NESTED_TEMPLATES: westeurope
+  PROD_LOCATION_RG_FOR_NESTED_TEMPLATES: westeurope
+  QA_NAME_STOR_ACCT_FOR_NESTED_TEMPLATES: qnaqastornestedtempl
+  PROD_NAME_STOR_ACCT_FOR_NESTED_TEMPLATES: qnastornestedtempl
+  QA_RG_PREFIX: qna-qa
+  PROD_PREFIX: qna
+  QA_RESOURCE_PREFIX: qnaqa
+  PROD_RESOURCE_PREFIX: qna
+
+on: 
+  push:
+    branches: 
+      - dev
+      - master
+
+jobs:
+  # set-environment:
+    # see: https://github.community/t5/GitHub-Actions/Set-environment-variable-based-on-git-branch/m-p/40271/highlight/true#M4160
+    # runs-on: ubuntu-latest
+    # name: 'Set environment variables'
+    # steps:
+    #  - name: Set env to staging
+    #    if: endsWith(github.ref, '/dev')
+    #    run: |
+    #      # echo "::set-env name=ENVIRONMENT::staging"
+    #      echo "::set-env name=DEPLOYMENT_NAME::qnaqa-root-deployment"
+    #      echo "::set-env name=FRONTEND_URL::https://qnaqa-frontdoor.azurefd.net/"
+    #      echo "::set-env name=NAME_RG_FOR_NESTED_TEMPLATES::qna-qa-infra"
+    #      echo "::set-env name=NAME_STOR_ACCT_FOR_NESTED_TEMPLATES::qnaqastornestedtempl"
+    #      echo "::set-env name=RG_PREFIX::qna-qa"
+    #      echo "::set-env name=RESOURCE_PREFIX::qnaqa"
+    #  - name: Set env to production
+    #    if: endsWith(github.ref, '/master')
+    #    run: |
+    #      # echo "::set-env name=ENVIRONMENT::production"
+    #      echo "::set-env name=DEPLOYMENT_NAME::qna-root-deployment"
+    #      echo "::set-env name=FRONTEND_URL::https://qna-frontdoor.azurefd.net/"
+    #      echo "::set-env name=NAME_RG_FOR_NESTED_TEMPLATES::qna-infra"
+    #      echo "::set-env name=NAME_STOR_ACCT_FOR_NESTED_TEMPLATES::qnastornestedtempl"
+    #      echo "::set-env name=RG_PREFIX::qna"
+    #      echo "::set-env name=RESOURCE_PREFIX::qna"
+  build-frontend:
+    runs-on: ubuntu-latest
+    name: 'Build-Quasar-Frontend'
+    steps:
+      # To use this repository's private action, you must check out the repository
+      - name: If development env (dev branch) => set dev variables
+        if: endsWith(github.ref, '/dev')
+        run: |
+          echo "::set-env name=FRONTEND_URL::${{ env.QA_FRONTEND_URL }}"
+      - name: If production env (master branch) => set prod variables
+        if: endsWith(github.ref, '/master')
+        run: |
+          echo "::set-env name=FRONTEND_URL::${{ env.PROD_FRONTEND_URL }}"
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: List-Dir
+        run: 'ls'
+      - name: Build-Quasar
+        uses: ./gh-action-build-quasar # Uses an action in the root directory
+        id: build-quasar
+        with:
+          sourcelocation: /github/workspace/qna
+      - name: Upload SPA files as artifact
+        uses: actions/upload-artifact@v1.0.0
+        env:
+          FRONTEND_URL: ${{ env.FRONTEND_URL }}
+        with:
+          # Artifact name
+          name: spa
+          # Directory containing files to upload
+          path: ./qna/dist/spa
+  build-functions:
+    runs-on: [windows-latest]
+    name: 'Build-Fn-Backend'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build-And-Package-Functions
+        shell: pwsh
+        run: cd .\deployment ; .\package-functionapp-to-zip.ps1
+      - name: Upload Functions package as artifact
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          # Artifact name
+          name: functions
+          # Directory containing files to upload
+          path: ./deployment/functionpackage/qna-fn-backend.zip
+  deploy-arm-templates:
+    needs: [build-frontend, build-functions]
+    runs-on: ubuntu-latest
+    container:
+      image: azuresdk/azure-powershell-core # => run step in container, as documented here: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idcontainer
+    name: Deploy-Arm-Templates
+    steps:
+      - name: If development env (dev branch) => set dev variables
+        if: endsWith(github.ref, '/dev')
+        run: |
+          echo "::set-env name=DEPLOYMENT_NAME::${{ env.QA_DEPLOYMENT_NAME }}"
+          echo "::set-env name=NAME_RG_FOR_NESTED_TEMPLATES::${{ env.QA_NAME_RG_FOR_NESTED_TEMPLATES }}"
+          echo "::set-env name=LOCATION_RG_FOR_NESTED_TEMPLATES::${{ env.QA_LOCATION_RG_FOR_NESTED_TEMPLATES }}"
+          echo "::set-env name=NAME_STOR_ACCT_FOR_NESTED_TEMPLATES::${{ env.QA_NAME_STOR_ACCT_FOR_NESTED_TEMPLATES }}"
+          echo "::set-env name=RG_PREFIX::${{ env.QA_RG_PREFIX }}"
+          echo "::set-env name=RESOURCE_PREFIX::${{ env.QA_RESOURCE_PREFIX }}"
+          echo "::set-env name=AAD_CLIENT_ID::${{ env.QA_AAD_CLIENT_ID }}"
+          echo "::set-env name=AAD_B2C_ISSUER::${{ env.QA_AAD_B2C_ISSUER }}"
+      - name: If production env (master branch) => set prod variables
+        if: endsWith(github.ref, '/master')
+        run: |
+          echo "::set-env name=DEPLOYMENT_NAME::${{ env.PROD_DEPLOYMENT_NAME }}"
+          echo "::set-env name=NAME_RG_FOR_NESTED_TEMPLATES::${{ env.PROD_NAME_RG_FOR_NESTED_TEMPLATES }}"
+          echo "::set-env name=LOCATION_RG_FOR_NESTED_TEMPLATES::${{ env.PROD_LOCATION_RG_FOR_NESTED_TEMPLATES }}"
+          echo "::set-env name=NAME_STOR_ACCT_FOR_NESTED_TEMPLATES::${{ env.PROD_NAME_STOR_ACCT_FOR_NESTED_TEMPLATES }}"
+          echo "::set-env name=RG_PREFIX::${{ env.PROD_RG_PREFIX }}"
+          echo "::set-env name=RESOURCE_PREFIX::${{ env.PROD_RESOURCE_PREFIX }}"
+          echo "::set-env name=AAD_CLIENT_ID::${{ env.PROD_AAD_CLIENT_ID }}"
+          echo "::set-env name=AAD_B2C_ISSUER::${{ env.PROD_AAD_B2C_ISSUER }}"
+      - name: PWSH-Login-To-Azure
+        shell: pwsh
+        run: |
+          # Install Powershell Az Module:
+          Install-Module -Name Az -AllowClobber -Scope CurrentUser -SkipPublisherCheck -AcceptLicense -Force ;
+          # Login to Azure:
+          Add-Type -Path "/usr/local/share/powershell/Modules/Az.Profile/PreloadAssemblies/Microsoft.IdentityModel.Clients.ActiveDirectory.dll" ;
+          Import-Module Az.Profile -Force ;
+          $Password = ConvertTo-SecureString ${{ secrets.SP_PROD_DEPL_PWD }} -AsPlainText -Force ;
+          $Creds = New-Object System.Management.Automation.PSCredential( '${{ secrets.SP_PROD_DEPL_APPID }}', $Password) ;
+          Connect-AzAccount -ServicePrincipal -SubscriptionId '${{ env.SUBSCRIPTION_ID }}' -TenantId '${{ env.TENANT_ID }}' -Credential $Creds ;
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Deploy-ARM-Template
+        shell: pwsh
+        run: |
+          cd deployment ;
+          ./deploy-infra -RootDeploymentName '${{ env.DEPLOYMENT_NAME }}' -NameRGForNestedTemplates '${{ env.NAME_RG_FOR_NESTED_TEMPLATES }}' -LocationRGForNestedTemplates ${{ env.LOCATION_RG_FOR_NESTED_TEMPLATES }}  -NameStorageAcctForNestedTemplates ${{ env.NAME_STOR_ACCT_FOR_NESTED_TEMPLATES }} -ResourceGroupPrefix ${{ env.RG_PREFIX }} -ArtifactPrefix ${{ env.RESOURCE_PREFIX }} -AADClientId '${{ env.AAD_CLIENT_ID }}' -AADB2CIssuer '${{ env.AAD_B2C_ISSUER }}' ;
+  deploy-static-website:
+    needs: [deploy-arm-templates]
+    runs-on: ubuntu-latest
+    container:
+      image: azuresdk/azure-powershell-core # => run step in container, as documented here: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idcontainer
+    name: Deploy-Static-Website
+    steps:
+      - name: If development env (dev branch) => set dev variables
+        if: endsWith(github.ref, '/dev')
+        run: |
+          echo "::set-env name=DEPLOYMENT_NAME::${{ env.QA_DEPLOYMENT_NAME }}"
+      - name: If production env (master branch) => set prod variables
+        if: endsWith(github.ref, '/master')
+        run: |
+          echo "::set-env name=DEPLOYMENT_NAME::${{ env.PROD_DEPLOYMENT_NAME }}"
+      - name: PWSH-Login-To-Azure
+        shell: pwsh
+        run: |
+          # Install Powershell Az Module:
+          Install-Module -Name Az -AllowClobber -Scope CurrentUser -SkipPublisherCheck -AcceptLicense -Force ;
+          # Login to Azure:
+          Add-Type -Path "/usr/local/share/powershell/Modules/Az.Profile/PreloadAssemblies/Microsoft.IdentityModel.Clients.ActiveDirectory.dll" ;
+          Import-Module Az.Profile -Force ;
+          $Password = ConvertTo-SecureString ${{ secrets.SP_PROD_DEPL_PWD }} -AsPlainText -Force ;
+          $Creds = New-Object System.Management.Automation.PSCredential( '${{ secrets.SP_PROD_DEPL_APPID }}', $Password) ;
+          Connect-AzAccount -ServicePrincipal -SubscriptionId '${{ env.SUBSCRIPTION_ID }}' -TenantId '${{ env.TENANT_ID }}' -Credential $Creds ;
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download artifact for static SPA website
+        uses: actions/download-artifact@v1
+        with:
+          name: spa  # => will be downloaded into folder "spa"
+      - name: Deploy SPA app to all storage accounts
+        shell: pwsh
+        run: |
+          Write-Host "contents of current dir"
+          ls;
+          cd spa;
+          Write-Host "contents of spa artifact directory:"
+          ls;
+          cd .. ;
+          cd deployment ;
+          ./deploy-static-assets-global.ps1 -DeploymentName '${{ env.DEPLOYMENT_NAME }}' -DistPath '../spa' ;
+
+  deploy-functions-backend:
+    needs: [deploy-arm-templates]
+    runs-on: ubuntu-latest
+    container:
+      image: azuresdk/azure-powershell-core # => run step in container, as documented here: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idcontainer
+    name: Deploy-Functions-Backend
+    steps:
+      - name: If development env (dev branch) => set dev variables
+        if: endsWith(github.ref, '/dev')
+        run: |
+          echo "::set-env name=DEPLOYMENT_NAME::${{ env.QA_DEPLOYMENT_NAME }}"
+      - name: If production env (master branch) => set prod variables
+        if: endsWith(github.ref, '/master')
+        run: |
+          echo "::set-env name=DEPLOYMENT_NAME::${{ env.PROD_DEPLOYMENT_NAME }}"
+      - name: PWSH-Login-To-Azure
+        shell: pwsh
+        run: |
+          # Install Powershell Az Module:
+          Install-Module -Name Az -AllowClobber -Scope CurrentUser -SkipPublisherCheck -AcceptLicense -Force ;
+          # Login to Azure:
+          Add-Type -Path "/usr/local/share/powershell/Modules/Az.Profile/PreloadAssemblies/Microsoft.IdentityModel.Clients.ActiveDirectory.dll" ;
+          Import-Module Az.Profile -Force ;
+          $Password = ConvertTo-SecureString ${{ secrets.SP_PROD_DEPL_PWD }} -AsPlainText -Force ;
+          $Creds = New-Object System.Management.Automation.PSCredential( '${{ secrets.SP_PROD_DEPL_APPID }}', $Password) ;
+          Connect-AzAccount -ServicePrincipal -SubscriptionId '${{ env.SUBSCRIPTION_ID }}' -TenantId '${{ env.TENANT_ID }}' -Credential $Creds ;
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download artifact for Azure Functions backend
+        uses: actions/download-artifact@v1
+        with:
+          name: functions  # => will be downloaded into folder "spa"
+      - name: Deploy Functions backend to all geos
+        shell: pwsh
+        run: |
+          cd deployment ;
+          ./deploy-function-package-global.ps1 -DeploymentName '${{ env.DEPLOYMENT_NAME }}' -PackagePath '../functions/qna-fn-backend.zip';
+          
+          
+          

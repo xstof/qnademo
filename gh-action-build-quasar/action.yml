@@ -1,0 +1,20 @@
+# action.yml
+name: 'Quasar-Build'
+description: 'Build a quasar app'
+inputs:
+  sourcelocation:  
+    description: 'Location of the quasar app'
+    required: true
+    default: './'
+# outputs:
+#   time: # id of output
+#     description: 'The time we greeted you'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    WORK_DIR: ${{ inputs.sourcelocation }}
+  args:
+    - quasar
+    - build
+    - ${{ inputs.sourcelocation }} 
