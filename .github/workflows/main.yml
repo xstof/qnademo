@@ -3,15 +3,24 @@ name: CI
 env:
   SUBSCRIPTION_ID: 33761810-ec30-441e-ad3e-50f029e977f7
   TENANT_ID: 72f988bf-86f1-41af-91ab-2d7cd011db47
-  AAD_CLIENT_ID: d03fc97e-cc4e-4758-944a-43fe4cf3eecc
-  AAD_B2C_ISSUER: https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_susi
-  DEPLOYMENT_NAME: qna-root-deployment
-  FRONTEND_URL: https://qnaqa-frontdoor.azurefd.net/
-  NAME_RG_FOR_NESTED_TEMPLATES: qna-qa-infra
-  LOCATION_RG_FOR_NESTED_TEMPLATES: westeurope
-  NAME_STOR_ACCT_FOR_NESTED_TEMPLATES: qnaqastornestedtempl
-  RG_PREFIX: qna-qa
-  RESOURCE_PREFIX: qnaqa
+  QA_AAD_CLIENT_ID: d03fc97e-cc4e-4758-944a-43fe4cf3eecc
+  PROD_AAD_CLIENT_ID: d03fc97e-cc4e-4758-944a-43fe4cf3eecc
+  QA_AAD_B2C_ISSUER: https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_susi
+  PROD_AAD_B2C_ISSUER: https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_susi
+  QA_DEPLOYMENT_NAME: qnaqa-root-deployment
+  PROD_DEPLOYMENT_NAME: qna-root-deployment
+  QA_FRONTEND_URL: https://qnaqa-frontdoor.azurefd.net/
+  PROD_FRONTEND_URL: https://qna-frontdoor.azurefd.net/
+  QA_NAME_RG_FOR_NESTED_TEMPLATES: qna-qa-infra
+  PROD_NAME_RG_FOR_NESTED_TEMPLATES: qna-infra
+  QA_LOCATION_RG_FOR_NESTED_TEMPLATES: westeurope
+  PROD_LOCATION_RG_FOR_NESTED_TEMPLATES: westeurope
+  QA_NAME_STOR_ACCT_FOR_NESTED_TEMPLATES: qnaqastornestedtempl
+  PROD_NAME_STOR_ACCT_FOR_NESTED_TEMPLATES: qnastornestedtempl
+  QA_RG_PREFIX: qna-qa
+  PROD_PREFIX: qna
+  QA_RESOURCE_PREFIX: qnaqa
+  PROD_RESOURCE_PREFIX: qna
 
 on: 
   push:
@@ -20,36 +29,44 @@ on:
       - master
 
 jobs:
-  set-environment:
+  # set-environment:
     # see: https://github.community/t5/GitHub-Actions/Set-environment-variable-based-on-git-branch/m-p/40271/highlight/true#M4160
-    runs-on: ubuntu-latest
-    name: 'Set environment variables'
-    steps:
-      - name: Set env to staging
-        if: endsWith(github.ref, '/dev')
-        run: |
-          # echo "::set-env name=ENVIRONMENT::staging"
-          echo "::set-env name=DEPLOYMENT_NAME::qnaqa-root-deployment"
-          echo "::set-env name=FRONTEND_URL::https://qnaqa-frontdoor.azurefd.net/"
-          echo "::set-env name=NAME_RG_FOR_NESTED_TEMPLATES::qna-qa-infra"
-          echo "::set-env name=NAME_STOR_ACCT_FOR_NESTED_TEMPLATES::qnaqastornestedtempl"
-          echo "::set-env name=RG_PREFIX::qna-qa"
-          echo "::set-env name=RESOURCE_PREFIX::qnaqa"
-      - name: Set env to production
-        if: endsWith(github.ref, '/master')
-        run: |
-          # echo "::set-env name=ENVIRONMENT::production"
-          echo "::set-env name=DEPLOYMENT_NAME::qna-root-deployment"
-          echo "::set-env name=FRONTEND_URL::https://qna-frontdoor.azurefd.net/"
-          echo "::set-env name=NAME_RG_FOR_NESTED_TEMPLATES::qna-infra"
-          echo "::set-env name=NAME_STOR_ACCT_FOR_NESTED_TEMPLATES::qnastornestedtempl"
-          echo "::set-env name=RG_PREFIX::qna"
-          echo "::set-env name=RESOURCE_PREFIX::qna"
+    # runs-on: ubuntu-latest
+    # name: 'Set environment variables'
+    # steps:
+    #  - name: Set env to staging
+    #    if: endsWith(github.ref, '/dev')
+    #    run: |
+    #      # echo "::set-env name=ENVIRONMENT::staging"
+    #      echo "::set-env name=DEPLOYMENT_NAME::qnaqa-root-deployment"
+    #      echo "::set-env name=FRONTEND_URL::https://qnaqa-frontdoor.azurefd.net/"
+    #      echo "::set-env name=NAME_RG_FOR_NESTED_TEMPLATES::qna-qa-infra"
+    #      echo "::set-env name=NAME_STOR_ACCT_FOR_NESTED_TEMPLATES::qnaqastornestedtempl"
+    #      echo "::set-env name=RG_PREFIX::qna-qa"
+    #      echo "::set-env name=RESOURCE_PREFIX::qnaqa"
+    #  - name: Set env to production
+    #    if: endsWith(github.ref, '/master')
+    #    run: |
+    #      # echo "::set-env name=ENVIRONMENT::production"
+    #      echo "::set-env name=DEPLOYMENT_NAME::qna-root-deployment"
+    #      echo "::set-env name=FRONTEND_URL::https://qna-frontdoor.azurefd.net/"
+    #      echo "::set-env name=NAME_RG_FOR_NESTED_TEMPLATES::qna-infra"
+    #      echo "::set-env name=NAME_STOR_ACCT_FOR_NESTED_TEMPLATES::qnastornestedtempl"
+    #      echo "::set-env name=RG_PREFIX::qna"
+    #      echo "::set-env name=RESOURCE_PREFIX::qna"
   build-frontend:
     runs-on: ubuntu-latest
     name: 'Build-Quasar-Frontend'
     steps:
       # To use this repository's private action, you must check out the repository
+      - name: If development env (dev branch) => set dev variables
+        if: endsWith(github.ref, '/dev')
+        run: |
+          echo "::set-env name=FRONTEND_URL::${{ env.QA_FRONTEND_URL }}"
+      - name: If production env (master branch) => set prod variables
+        if: endsWith(github.ref, '/master')
+        run: |
+          echo "::set-env name=FRONTEND_URL::${{ env.PROD_FRONTEND_URL }}"
       - name: Checkout
         uses: actions/checkout@v2
       - name: List-Dir
@@ -91,6 +108,26 @@ jobs:
       image: azuresdk/azure-powershell-core # => run step in container, as documented here: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idcontainer
     name: Deploy-Arm-Templates
     steps:
+      - name: If development env (dev branch) => set dev variables
+        if: endsWith(github.ref, '/dev')
+        run: |
+          echo "::set-env name=NAME_RG_FOR_NESTED_TEMPLATES::${{ env.QA_NAME_RG_FOR_NESTED_TEMPLATES }}"
+          echo "::set-env name=LOCATION_RG_FOR_NESTED_TEMPLATES::${{ env.QA_LOCATION_RG_FOR_NESTED_TEMPLATES }}"
+          echo "::set-env name=NAME_STOR_ACCT_FOR_NESTED_TEMPLATES::${{ env.QA_NAME_STOR_ACCT_FOR_NESTED_TEMPLATES }}"
+          echo "::set-env name=RG_PREFIX::${{ env.QA_RG_PREFIX }}"
+          echo "::set-env name=RESOURCE_PREFIX::${{ env.QA_RESOURCE_PREFIX }}"
+          echo "::set-env name=AAD_CLIENT_ID::${{ env.QA_AAD_CLIENT_ID }}"
+          echo "::set-env name=AAD_B2C_ISSUER::${{ env.QA_AAD_B2C_ISSUER }}"
+      - name: If production env (master branch) => set prod variables
+        if: endsWith(github.ref, '/master')
+        run: |
+          echo "::set-env name=NAME_RG_FOR_NESTED_TEMPLATES::${{ env.PROD_NAME_RG_FOR_NESTED_TEMPLATES }}"
+          echo "::set-env name=LOCATION_RG_FOR_NESTED_TEMPLATES::${{ env.PROD_LOCATION_RG_FOR_NESTED_TEMPLATES }}"
+          echo "::set-env name=NAME_STOR_ACCT_FOR_NESTED_TEMPLATES::${{ env.PROD_NAME_STOR_ACCT_FOR_NESTED_TEMPLATES }}"
+          echo "::set-env name=RG_PREFIX::${{ env.PROD_RG_PREFIX }}"
+          echo "::set-env name=RESOURCE_PREFIX::${{ env.PROD_RESOURCE_PREFIX }}"
+          echo "::set-env name=AAD_CLIENT_ID::${{ env.PROD_AAD_CLIENT_ID }}"
+          echo "::set-env name=AAD_B2C_ISSUER::${{ env.PROD_AAD_B2C_ISSUER }}"
       - name: PWSH-Login-To-Azure
         shell: pwsh
         run: |
@@ -116,6 +153,14 @@ jobs:
       image: azuresdk/azure-powershell-core # => run step in container, as documented here: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idcontainer
     name: Deploy-Static-Website
     steps:
+      - name: If development env (dev branch) => set dev variables
+        if: endsWith(github.ref, '/dev')
+        run: |
+          echo "::set-env name=DEPLOYMENT_NAME::${{ env.QA_DEPLOYMENT_NAME }}"
+      - name: If production env (master branch) => set prod variables
+        if: endsWith(github.ref, '/master')
+        run: |
+          echo "::set-env name=DEPLOYMENT_NAME::${{ env.PROD_DEPLOYMENT_NAME }}"
       - name: PWSH-Login-To-Azure
         shell: pwsh
         run: |
@@ -152,6 +197,14 @@ jobs:
       image: azuresdk/azure-powershell-core # => run step in container, as documented here: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idcontainer
     name: Deploy-Functions-Backend
     steps:
+      - name: If development env (dev branch) => set dev variables
+        if: endsWith(github.ref, '/dev')
+        run: |
+          echo "::set-env name=DEPLOYMENT_NAME::${{ env.QA_DEPLOYMENT_NAME }}"
+      - name: If production env (master branch) => set prod variables
+        if: endsWith(github.ref, '/master')
+        run: |
+          echo "::set-env name=DEPLOYMENT_NAME::${{ env.PROD_DEPLOYMENT_NAME }}"
       - name: PWSH-Login-To-Azure
         shell: pwsh
         run: |
