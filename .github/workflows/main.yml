@@ -18,11 +18,7 @@ env:
   QA_NAME_STOR_ACCT_FOR_NESTED_TEMPLATES: qnaqastornestedtempl
   PROD_NAME_STOR_ACCT_FOR_NESTED_TEMPLATES: qnastornestedtempl
   QA_RG_PREFIX: qna-qa
-<<<<<<< HEAD
-  PROD_PREFIX: qna
-=======
   PROD_RG_PREFIX: qna
->>>>>>> dev
   QA_RESOURCE_PREFIX: qnaqa
   PROD_RESOURCE_PREFIX: qna
 
