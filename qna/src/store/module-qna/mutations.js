@@ -48,7 +48,6 @@ export function releaseQuestion (state, question) {
 }
 
 export function setCurrentQuestionToVoteOn (state, question) {
-  // state.currentQuestionToVoteUpon = question
   Vue.set(state, 'currentQuestionToVoteUpon', question)
 }
 

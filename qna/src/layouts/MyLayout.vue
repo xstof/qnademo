@@ -76,7 +76,6 @@ export default {
   },
 
   created () {
-    // this.$store.dispatch('qna/loadConfiguration')
   },
 
   computed: {

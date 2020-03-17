@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import { msalInstance, login } from '../auth'
+import { getAccount, login } from '../auth'
 
 import routes from './routes'
 
@@ -24,23 +24,20 @@ export default function ({ store }) { /* could also have ssrContext injected her
   })
 
   Router.beforeEach((to, from, next) => {
-    if (msalInstance.getAccount()) {
-      let account = msalInstance.getAccount()
-      let email = ''
-      if (account.idToken.emails) {
-        email = account.idToken.emails[0]
-        console.log(`email is ${email}`)
-      }
-      store.commit('qna/setUser', { id: account.accountIdentifier, name: account.name, email: email })
+    var account = getAccount()
+    if (account) {
+      store.commit('qna/setUser', { id: account.id, name: account.name, email: account.email })
       console.log('user was already logged in; committed user details to store')
       next()
     } else if (to.matched.some(record => record.meta.requiresAuth)) {
+      console.log('path being navigated to requires being logged in - redirecting now')
       login()
       // next({
       //   path: '/login',
       //   query: { returnto: to.path },
       //   params: { nextUrl: to.fullPath }
       // })
+      next()
     } else {
       next()
     }

@@ -3,10 +3,14 @@
 
 module.exports = function (ctx) {
   return {
+    // see: https://quasar.dev/quasar-cli/cli-documentation/prefetch-feature
+    preFetch: true,
+
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/cli-documentation/boot-files
     boot: [
+      // '~msal/dist/msal.js',
       'axios'
     ],
 

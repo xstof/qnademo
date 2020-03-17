@@ -23,7 +23,7 @@ export default function (/* { ssrContext } */) {
   })
 
   // initialize store with basic config from backend:
-  Store.dispatch('qna/loadConfiguration')
+  // Store.dispatch('qna/loadConfiguration')
 
   return Store
 }

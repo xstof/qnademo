@@ -1,20 +1,3 @@
-// import Vue from 'vue'
-// import axios from 'axios'
-// // import { Verify } from 'crypto'
-
-// // let axiosInstance = axios
-
-// if (process.env.DEV) {
-//   console.log('configuring quasar for local dev')
-//   const axiosInstance = axios.create({
-//     baseUrl: 'https://qna-frontdoor.azurefd.net/'
-//   })
-//   Vue.prototype = axiosInstance
-// } else {
-//   Vue.prototype.$axios = axios
-// }
-
-// // export { axiosInstance }
 import Vue from 'vue'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
@@ -26,30 +9,41 @@ import { getToken } from '../auth'
 // TODO - make this URL dynamic
 
 // console.log(`axiosInstance being created - ${window.location.protocol}//${window.location.hostname}//`)
-console.log(`axiosInstance being created: ${process.env.FRONTEND_URL}`)
+
+var frontendurl = 'https://qnaqa-frontdoor.azurefd.net/'
+if (process.env.FRONTEND_URL) {
+  frontendurl = process.env.FRONTEND_URL
+}
+console.log(`axiosInstance being created: ${frontendurl}`)
 const axiosInstance = axios.create({
   // do not hardcode frontend url, use quasar variables instead
   // see: https://quasar.dev/quasar-cli/cli-documentation/handling-process-env#Example
-  baseURL: process.env.FRONTEND_URL
+  baseURL: frontendurl
   // baseURL: 'https://qnaqa-frontdoor.azurefd.net/'
 })
 
 axiosInstance.interceptors.request.use(
   config => {
-    console.log(`trying to get token to attach to auth header for url: ${config.url}`)
+    console.log(`url requested: ${config.url}`)
+    if (config.url !== 'api/configuration') {
+      console.log(`trying to get token to attach to auth header for url: ${config.url}`)
 
-    return getToken().then(function (token) {
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`
-        console.log(`added bearer token to auth header for url: ${config.url}`)
-      }
+      return getToken().then(function (token) {
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`
+          console.log(`added bearer token to auth header for url: ${config.url}`)
+        }
+        return config
+      }).catch(function (error) {
+        console.log(`failed fetching token for url: ${config.url}`)
+        let e = error
+        if (e) {}
+        return config
+      })
+    } else {
+      console.log('making request to api/configuration - no need for token')
       return config
-    }).catch(function (error) {
-      console.log(`failed fetching token for url: ${config.url}`)
-      let e = error
-      if (e) {}
-      return config
-    })
+    }
   }, error => {
     Promise.reject(error)
   }

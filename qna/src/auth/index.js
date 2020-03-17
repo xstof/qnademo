@@ -1,11 +1,16 @@
 import * as Msal from 'msal'
+import store from './../store/module-qna'
 
 // TODO: CHANGE THIS TO REFLECT YOUR APP REGISTRATION AND AAD B2C TENANT:
-let clientId = 'd03fc97e-cc4e-4758-944a-43fe4cf3eecc'
-let authorityForSignin = 'https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/b2c_1_susi'
+// let clientId = 'd03fc97e-cc4e-4758-944a-43fe4cf3eecc'
+let clientId = ''
+// let authorityForSignin = 'https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/b2c_1_susi'
+let authorityForSignin = ''
 
-console.log('setting msal redirect uri to:')
-console.log(`${window.location.protocol}//${window.location.hostname}:${window.location.port}/login`)
+// console.log('setting msal redirect uri to:')
+// console.log(`${window.location.protocol}//${window.location.hostname}:${window.location.port}/login`)
+// let redirectUri =  `${window.location.protocol}//${window.location.hostname}:${window.location.port}/login`
+// let redirectUri = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`
 
 function loggerCallback (logLevel, message, containsPii) {
   console.log(message)
@@ -18,7 +23,7 @@ let msalConfig = {
     validateAuthority: false,
     redirectUri: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/login`,
     postLogoutRedirectUri: `${window.location.protocol}//${window.location.hostname}:${window.location.port}`
-    // navigateToLoginRequestUrl: false,
+    // navigateToLoginRequestUrl: false
   },
   cache: {
     cacheLocation: 'localStorage'
@@ -33,9 +38,33 @@ let msalConfig = {
     )
   }
 }
-var msalInstance = new Msal.UserAgentApplication(msalConfig)
 
-msalInstance.handleRedirectCallback(authRedirectCallBack)
+var msalInstance = null
+var isInitialized = false
+
+function ensureInitialized () {
+  if (!isInitialized) {
+    if (store.state) {
+      console.log('initializing auth - fetching auth configuration from store:')
+      console.log('- old msal config:')
+      console.log(JSON.stringify(msalConfig.auth))
+      var authConfig = store.state.configuration.auth
+      console.log('- fetched config: ')
+      console.log(JSON.stringify(store.state.configuration.auth))
+      msalConfig.auth.clientId = authConfig.clientId
+      msalConfig.auth.authority = authConfig.authority
+      console.log('initialized auth - new msal config:')
+      console.log(JSON.stringify(msalConfig.auth))
+
+      // initialize msalInstance with updated msalConfig
+      msalInstance = new Msal.UserAgentApplication(msalConfig)
+      msalInstance.handleRedirectCallback(authRedirectCallBack)
+
+      // initialization finished
+      isInitialized = true
+    }
+  }
+}
 
 // TODO: CHANGE THIS TO REFLECT YOUR APP REGISTRATION AND AAD B2C TENANT:
 var loginRequest = {
@@ -54,6 +83,7 @@ function authRedirectCallBack (error, response) {
   } else {
     var acct = window.localStorage.getItem('acct')
     if (!acct) {
+      // below line is a workaround for bug: https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/1308
       console.log('seeing account for first time - storing it to fetch access tokens with later on')
       window.localStorage.setItem('acct', JSON.stringify(msalInstance.getAccount()))
       var acctStored = JSON.parse(window.localStorage.getItem('acct'))
@@ -62,9 +92,7 @@ function authRedirectCallBack (error, response) {
 
     if (response.tokenType === 'id_token') {
       console.log('id token received')
-      // acquireTokenRedirectAndCallMSGraph(graphConfig.graphMeEndpoint, loginRequest)
     } else if (response.tokenType === 'access_token') {
-      // callMSGraph(graphConfig.graphMeEndpoint, response.accessToken, graphAPICallback)
     } else {
       console.log('token type is:' + response.tokenType)
     }
@@ -72,10 +100,21 @@ function authRedirectCallBack (error, response) {
   console.log('authredirect callback executed')
 }
 
+function shouldLogin () {
+  var acct = msalInstance.getAccount()
+  var isLoginInProgress = msalInstance.getLoginInProgress()
+  if (!acct) {
+    if (!isLoginInProgress) {
+      return true
+    }
+  }
+  return false
+}
+
 function login () {
-  if (!msalInstance.getAccount() && !msalInstance.loginInProgress) {
+  ensureInitialized()
+  if (shouldLogin()) {
     console.log('about to redirect using msal for a login flow')
-    // msalInstance.redirectUri = `${baseRedirectUri}?returnto=${window.location.pathname}`
     msalInstance.loginRedirect(loginRequest)
   }
 }
@@ -93,6 +132,7 @@ var editProfileRequest = {
 }
 
 function editProfile () {
+  ensureInitialized()
   // msalInstance.redirectUri = `${baseRedirectUri}?returnto=${window.location.pathname}`
   console.log('about to redirect using msal for a profile edit flow')
   msalInstance.loginRedirect(editProfileRequest)
@@ -112,6 +152,7 @@ var accessTokenRequest = {
 }
 
 function getToken () {
+  ensureInitialized()
   return new Promise(function (resolve, reject) {
     if (msalInstance.getAccount()) {
       var acct = JSON.parse(window.localStorage.getItem('acct'))
@@ -122,16 +163,20 @@ function getToken () {
         .then(function (accessTokenResponse) {
           if (!accessTokenResponse.accessToken) {
             console.error(accessTokenResponse)
-            // debugger
           }
           let accessToken = accessTokenResponse.accessToken
           console.log(`got access token: ${accessToken}`)
           resolve(accessToken)
         })
         .catch(function (error) {
-          // console.log('failed acquiring an access token')
-          // console.log(error)
-          reject(error)
+          console.log(`acquireTokenSilent failed - might need interaction`)
+          if (error.errorMessage.indexOf('interaction_required') !== -1 || error.errorMessage.indexOf('InteractionRequiredAuthError') !== -1) {
+            msalInstance.acquireTokenRedirect(accessTokenRequest)
+          } else {
+            console.log('no indication interaction was required - failed acquiring an access token')
+            console.log(error)
+            reject(error)
+          }
         })
     } else {
       reject('user not logged in - no token can be fetched')
@@ -139,4 +184,24 @@ function getToken () {
   })
 }
 
-export { msalInstance, login, logout, editProfile, getToken }
+function getAccount () {
+  var account = null
+
+  if (msalInstance && msalInstance.getAccount()) {
+    account = {
+      id: '',
+      name: '',
+      email: ''
+    }
+    var msalAccount = msalInstance.getAccount()
+    account.id = msalAccount.accountIdentifier
+    account.name = msalAccount.name
+    if (msalAccount.idToken && msalAccount.idToken.emails) {
+      account.email = msalAccount.idToken.emails[0]
+    }
+  }
+
+  return account
+}
+
+export { ensureInitialized, getAccount, login, logout, editProfile, getToken }
