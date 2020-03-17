@@ -86,7 +86,7 @@
                 },
                 "parameters": {
                     "laWorkspaceName": {
-                        "value": "[concat(variables('artifactPrefix'), '-la')]"
+                        "value": "[concat(variables('artifactPrefix'), '-loganalytics')]"
                     }
                 }
             },
