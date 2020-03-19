@@ -1,16 +1,11 @@
 import * as Msal from 'msal'
 import store from './../store/module-qna'
 
-// TODO: CHANGE THIS TO REFLECT YOUR APP REGISTRATION AND AAD B2C TENANT:
 // let clientId = 'd03fc97e-cc4e-4758-944a-43fe4cf3eecc'
-let clientId = ''
 // let authorityForSignin = 'https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/b2c_1_susi'
-let authorityForSignin = ''
 
-// console.log('setting msal redirect uri to:')
-// console.log(`${window.location.protocol}//${window.location.hostname}:${window.location.port}/login`)
-// let redirectUri =  `${window.location.protocol}//${window.location.hostname}:${window.location.port}/login`
-// let redirectUri = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`
+let clientId = ''
+let authorityForSignin = ''
 
 function loggerCallback (logLevel, message, containsPii) {
   console.log(message)
@@ -45,16 +40,16 @@ var isInitialized = false
 function ensureInitialized () {
   if (!isInitialized) {
     if (store.state) {
-      console.log('initializing auth - fetching auth configuration from store:')
-      console.log('- old msal config:')
-      console.log(JSON.stringify(msalConfig.auth))
+      // console.log('initializing auth - fetching auth configuration from store:')
+      // console.log('- old msal config:')
+      // console.log(JSON.stringify(msalConfig.auth))
       var authConfig = store.state.configuration.auth
-      console.log('- fetched config: ')
-      console.log(JSON.stringify(store.state.configuration.auth))
+      // console.log('- fetched config: ')
+      // console.log(JSON.stringify(store.state.configuration.auth))
       msalConfig.auth.clientId = authConfig.clientId
       msalConfig.auth.authority = authConfig.authority
-      console.log('initialized auth - new msal config:')
-      console.log(JSON.stringify(msalConfig.auth))
+      // console.log('initialized auth - new msal config:')
+      // console.log(JSON.stringify(msalConfig.auth))
 
       // initialize msalInstance with updated msalConfig
       msalInstance = new Msal.UserAgentApplication(msalConfig)
@@ -133,10 +128,8 @@ var editProfileRequest = {
 
 function editProfile () {
   ensureInitialized()
-  // msalInstance.redirectUri = `${baseRedirectUri}?returnto=${window.location.pathname}`
   console.log('about to redirect using msal for a profile edit flow')
   msalInstance.loginRedirect(editProfileRequest)
-  // login()
 }
 
 // TODO: CHANGE THIS TO REFLECT YOUR APP REGISTRATION AND AAD B2C TENANT:
@@ -157,15 +150,15 @@ function getToken () {
     if (msalInstance.getAccount()) {
       var acct = JSON.parse(window.localStorage.getItem('acct'))
       accessTokenRequest.account = acct
-      console.log('access token request parameters:')
-      console.log(accessTokenRequest)
+      // console.log('access token request parameters:')
+      // console.log(accessTokenRequest)
       msalInstance.acquireTokenSilent(accessTokenRequest)
         .then(function (accessTokenResponse) {
           if (!accessTokenResponse.accessToken) {
             console.error(accessTokenResponse)
           }
           let accessToken = accessTokenResponse.accessToken
-          console.log(`got access token: ${accessToken}`)
+          // console.log(`got access token: ${accessToken}`)
           resolve(accessToken)
         })
         .catch(function (error) {

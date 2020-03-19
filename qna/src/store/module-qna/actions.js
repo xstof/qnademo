@@ -9,6 +9,11 @@ export function loadConfiguration (context) {
         context.commit('setConfigRegion', response.data.region)
         context.commit('setConfigSignalRNegotiateUrl', response.data.signalRNegotiateUrl)
         context.commit('setConfigBrowserSessionId', response.data.browserSessionId)
+        context.commit('setConfigForAuth', {
+          clientId: response.data.auth.clientId,
+          authority: response.data.auth.authority,
+          authoringScope: response.data.auth.authoringScope
+        })
         // let config = context.state.configuration
         // console.log(config)
         resolve()

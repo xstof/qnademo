@@ -21,6 +21,12 @@ export function setConfigBrowserSessionId (state, browserSessionId) {
   state.configuration.browserSessionId = browserSessionId
 }
 
+export function setConfigForAuth (state, auth) {
+  state.configuration.auth.clientId = auth.clientId
+  state.configuration.auth.authority = auth.authority
+  state.configuration.auth.authoringScope = auth.authoringScope
+}
+
 export function setUser (state, userDetails) {
   state.isSignedIn = true
   state.user.id = userDetails.id

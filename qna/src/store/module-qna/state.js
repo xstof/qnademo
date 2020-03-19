@@ -2,7 +2,8 @@ export default {
   configuration: {
     region: '',
     auth: {
-      clientId: 'd03fc97e-cc4e-4758-944a-43fe4cf3eecc',
+      // TODO: these values are currently used for authentication and should be coming from remote config instead
+      clientId: 'd03fc97e-cc4e-4758-944a-43fe4cf3eeccxxxxxxx',
       authority: 'https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/b2c_1_susi',
       authoringScope: 'https://xstofb2c.onmicrosoft.com/qna/qna_author'
     },

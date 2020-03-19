@@ -5,7 +5,7 @@ env:
   TENANT_ID: 72f988bf-86f1-41af-91ab-2d7cd011db47
   QA_AAD_CLIENT_ID: d03fc97e-cc4e-4758-944a-43fe4cf3eecc
   PROD_AAD_CLIENT_ID: d03fc97e-cc4e-4758-944a-43fe4cf3eecc
-  QA_AAD_B2C_ISSUER: https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_susi
+  QA_AAD_B2C_ISSUER: https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/b2c_1_susi # => this impacts both the easy auth setting and function app settings
   PROD_AAD_B2C_ISSUER: https://xstofb2c.b2clogin.com/xstofb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_susi
   QA_DEPLOYMENT_NAME: qnaqa-root-deployment
   PROD_DEPLOYMENT_NAME: qna-root-deployment

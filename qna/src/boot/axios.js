@@ -26,12 +26,12 @@ axiosInstance.interceptors.request.use(
   config => {
     console.log(`url requested: ${config.url}`)
     if (config.url !== 'api/configuration') {
-      console.log(`trying to get token to attach to auth header for url: ${config.url}`)
+      // console.log(`trying to get token to attach to auth header for url: ${config.url}`)
 
       return getToken().then(function (token) {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
-          console.log(`added bearer token to auth header for url: ${config.url}`)
+          // console.log(`added bearer token to auth header for url: ${config.url}`)
         }
         return config
       }).catch(function (error) {
