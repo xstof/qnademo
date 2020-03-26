@@ -19,14 +19,13 @@ const axiosInstance = axios.create({
   // do not hardcode frontend url, use quasar variables instead
   // see: https://quasar.dev/quasar-cli/cli-documentation/handling-process-env#Example
   baseURL: frontendurl
-  // baseURL: 'https://qnaqa-frontdoor.azurefd.net/'
 })
 
 axiosInstance.interceptors.request.use(
   config => {
-    console.log(`url requested: ${config.url}`)
+    console.log(`axios: url requested: ${config.url}`)
     if (config.url !== 'api/configuration') {
-      // console.log(`trying to get token to attach to auth header for url: ${config.url}`)
+      console.log(`axios: trying to get token to attach to auth header for url: ${config.url}`)
 
       return getToken().then(function (token) {
         if (token) {
@@ -35,13 +34,13 @@ axiosInstance.interceptors.request.use(
         }
         return config
       }).catch(function (error) {
-        console.log(`failed fetching token for url: ${config.url}`)
+        console.log(`axios: failed fetching token for url: ${config.url}`)
         let e = error
         if (e) {}
         return config
       })
     } else {
-      console.log('making request to api/configuration - no need for token')
+      console.log('axios: making request to api/configuration - no need for token')
       return config
     }
   }, error => {

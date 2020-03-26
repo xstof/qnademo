@@ -158,21 +158,21 @@ function getToken () {
             console.error(accessTokenResponse)
           }
           let accessToken = accessTokenResponse.accessToken
-          // console.log(`got access token: ${accessToken}`)
+          console.log(`auth: got access token: ${accessToken}`)
           resolve(accessToken)
         })
         .catch(function (error) {
-          console.log(`acquireTokenSilent failed - might need interaction`)
+          console.log(`auth: acquireTokenSilent failed - might need interaction`)
           if (error.errorMessage.indexOf('interaction_required') !== -1 || error.errorMessage.indexOf('InteractionRequiredAuthError') !== -1) {
             msalInstance.acquireTokenRedirect(accessTokenRequest)
           } else {
-            console.log('no indication interaction was required - failed acquiring an access token')
+            console.log('auth: no indication interaction was required - failed acquiring an access token')
             console.log(error)
             reject(error)
           }
         })
     } else {
-      reject('user not logged in - no token can be fetched')
+      reject('auth: user not logged in - no token can be fetched')
     }
   })
 }

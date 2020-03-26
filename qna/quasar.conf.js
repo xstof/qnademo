@@ -11,7 +11,8 @@ module.exports = function (ctx) {
     // https://quasar.dev/quasar-cli/cli-documentation/boot-files
     boot: [
       // '~msal/dist/msal.js',
-      'axios'
+      'axios',
+      'authboot'
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
