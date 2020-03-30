@@ -10,7 +10,6 @@ module.exports = function (ctx) {
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/cli-documentation/boot-files
     boot: [
-      // '~msal/dist/msal.js',
       'axios',
       'authboot'
     ],

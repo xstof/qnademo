@@ -32,11 +32,6 @@ export default async ({ router, store }) => {
     } else if (to.matched.some(record => record.meta.requiresAuth)) {
       console.log('router: path being navigated to requires being logged in - redirecting now')
       login()
-      // next({
-      //   path: '/login',
-      //   query: { returnto: to.path },
-      //   params: { nextUrl: to.fullPath }
-      // })
       next()
     } else {
       next()

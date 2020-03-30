@@ -30,7 +30,7 @@ axiosInstance.interceptors.request.use(
       return getToken().then(function (token) {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
-          // console.log(`added bearer token to auth header for url: ${config.url}`)
+          console.log(`axios: added bearer token to auth header for url: ${config.url}`)
         }
         return config
       }).catch(function (error) {

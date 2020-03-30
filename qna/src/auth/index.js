@@ -26,7 +26,7 @@ let msalConfig = {
   system: {
     logger: new Msal.Logger(
       loggerCallback, {
-        level: Msal.LogLevel.Verbose,
+        // level: Msal.LogLevel.Verbose,
         piiLoggingEnabled: true,
         correlationId: '1234'
       }
@@ -158,7 +158,7 @@ function getToken () {
             console.error(accessTokenResponse)
           }
           let accessToken = accessTokenResponse.accessToken
-          console.log(`auth: got access token: ${accessToken}`)
+          // console.log(`auth: got access token: ${accessToken}`)
           resolve(accessToken)
         })
         .catch(function (error) {
