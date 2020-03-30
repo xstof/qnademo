@@ -26,7 +26,7 @@ jobs:
         ###### Repository/Build Configurations - These values can be configured to match you app requirements. ######
         app_location: 'qna' # App source code path
         api_location: 'qna-backend' # Api source code path - optional
-        app_artifact_location: 'qna/dist/spa' # Built app content directory - optional
+        app_artifact_location: 'dist/spa' # Built app content directory - optional
         ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
