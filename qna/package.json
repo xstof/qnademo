@@ -13,7 +13,7 @@
   "dependencies": {
     "@aspnet/signalr": "^3.0.0-preview6.19307.2",
     "@quasar/extras": "^1.5.1",
-    "axios": "^0.18.1",
+    "axios": "^0.21.1",
     "axios-retry": "^3.1.2",
     "msal": "^1.2.1",
     "qrcode": "^1.4.4",
